@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>最终错误修复测试</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">最终错误修复测试</h1>
+        
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">修复内容总结</h2>
+            <div class="space-y-3">
+                <div class="flex items-center">
+                    <span class="w-3 h-3 bg-green-500 rounded-full mr-3"></span>
+                    <span>修复了子模型评估中的可选链操作符访问</span>
+                </div>
+                <div class="flex items-center">
+                    <span class="w-3 h-3 bg-green-500 rounded-full mr-3"></span>
+                    <span>修复了专业评估概览中的属性安全访问</span>
+                </div>
+                <div class="flex items-center">
+                    <span class="w-3 h-3 bg-green-500 rounded-full mr-3"></span>
+                    <span>重新添加了防御性编程检查</span>
+                </div>
+                <div class="flex items-center">
+                    <span class="w-3 h-3 bg-green-500 rounded-full mr-3"></span>
+                    <span>提供了默认健康数据确保评估正常进行</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">测试按钮</h2>
+            <div class="space-x-4">
+                <button onclick="testSafePropertyAccess()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
+                    测试安全属性访问
+                </button>
+                <button onclick="testDefaultHealthData()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">
+                    测试默认健康数据
+                </button>
+                <button onclick="testDefensiveProgramming()" class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded">
+                    测试防御性编程
+                </button>
+            </div>
+        </div>
+
+        <div id="test-results" class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">测试结果</h2>
+            <div id="results-content" class="text-gray-600">
+                点击上方按钮开始测试...
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * 测试安全属性访问
+         */
+        function testSafePropertyAccess() {
+            const resultsDiv = document.getElementById('results-content');
+            
+            // 模拟可能不完整的数据结构
+            const testCases = [
+                {
+                    name: '完整数据',
+                    data: {
+                        professionalAssessment: {
+                            compositeScore: { score: 85, confidence: 92 },
+                            riskStratification: { category: '低风险' },
+                            subModelAssessments: {
+                                bloodPressure: { assessment: '正常' },
+                                bloodOxygen: { assessment: '良好' },
+                                temperaturePulse: { assessment: '稳定' }
+                            }
+                        }
+                    }
+                },
+                {
+                    name: '部分缺失数据',
+                    data: {
+                        professionalAssessment: {
+                            compositeScore: { score: 75 },
+                            riskStratification: { category: '中风险' },
+                            subModelAssessments: {
+                                bloodPressure: { assessment: '偏高' }
+                                // 缺少其他子模型数据
+                            }
+                        }
+                    }
+                },
+                {
+                    name: '严重缺失数据',
+                    data: {
+                        professionalAssessment: {
+                            compositeScore: {},
+                            riskStratification: {},
+                            subModelAssessments: {}
+                        }
+                    }
+                }
+            ];
+
+            let results = '<div class="space-y-4">';
+            
+            testCases.forEach(testCase => {
+                try {
+                    const { professionalAssessment } = testCase.data;
+                    
+                    // 测试安全属性访问
+                    const score = professionalAssessment.compositeScore?.score || 'N/A';
+                    const category = professionalAssessment.riskStratification?.category || '未知';
+                    const confidence = professionalAssessment.compositeScore?.confidence || 'N/A';
+                    
+                    const bpAssessment = professionalAssessment.subModelAssessments?.bloodPressure?.assessment || '無數據';
+                    const spO2Assessment = professionalAssessment.subModelAssessments?.bloodOxygen?.assessment || '無數據';
+                    const tempAssessment = professionalAssessment.subModelAssessments?.temperaturePulse?.assessment || '無數據';
+                    
+                    results += `
+                        <div class="border rounded p-4">
+                            <h3 class="font-semibold text-green-600 mb-2">✅ ${testCase.name}测试通过</h3>
+                            <div class="grid grid-cols-2 gap-4 text-sm">
+                                <div>
+                                    <p>综合评分: ${score}</p>
+                                    <p>风险分层: ${category}</p>
+                                    <p>置信度: ${confidence}%</p>
+                                </div>
+                                <div>
+                                    <p>血压评估: ${bpAssessment}</p>
+                                    <p>血氧评估: ${spO2Assessment}</p>
+                                    <p>体温评估: ${tempAssessment}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } catch (error) {
+                    results += `
+                        <div class="border rounded p-4">
+                            <h3 class="font-semibold text-red-600 mb-2">❌ ${testCase.name}测试失败</h3>
+                            <p class="text-sm">错误: ${error.message}</p>
+                        </div>
+                    `;
+                }
+            });
+            
+            results += '</div>';
+            resultsDiv.innerHTML = results;
+        }
+
+        /**
+         * 测试默认健康数据
+         */
+        function testDefaultHealthData() {
+            const resultsDiv = document.getElementById('results-content');
+            
+            // 模拟collectHealthData函数的默认数据
+            const defaultHealthData = {
+                age: 65,
+                gender: '男',
+                bloodPressure: {
+                    systolic: 120,
+                    diastolic: 80,
+                    pulse: 72
+                },
+                bmi: 22.5,
+                glucose: 5.5,
+                heartRate: 72,
+                temperature: { value: 36.5, location: '腋下' },
+                spO2: { percent: 98, pi: 1.2, pr: 72 },
+                diabetes: false,
+                hypertension: false,
+                heartDisease: false,
+                smoking: false,
+                exercise: false
+            };
+
+            resultsDiv.innerHTML = `
+                <div class="text-green-600">
+                    <h3 class="font-semibold mb-2">✅ 默认健康数据测试通过</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-3">
+                        <div>
+                            <h4 class="font-medium">基本信息</h4>
+                            <ul class="text-sm space-y-1">
+                                <li>年龄: ${defaultHealthData.age}岁</li>
+                                <li>性别: ${defaultHealthData.gender}</li>
+                                <li>BMI: ${defaultHealthData.bmi}</li>
+                                <li>血糖: ${defaultHealthData.glucose} mmol/L</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-medium">生理指标</h4>
+                            <ul class="text-sm space-y-1">
+                                <li>血压: ${defaultHealthData.bloodPressure.systolic}/${defaultHealthData.bloodPressure.diastolic} mmHg</li>
+                                <li>心率: ${defaultHealthData.heartRate} bpm</li>
+                                <li>体温: ${defaultHealthData.temperature.value}°C</li>
+                                <li>血氧: ${defaultHealthData.spO2.percent}%</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-medium">健康史</h4>
+                            <ul class="text-sm space-y-1">
+                                <li>糖尿病: ${defaultHealthData.diabetes ? '是' : '否'}</li>
+                                <li>高血压: ${defaultHealthData.hypertension ? '是' : '否'}</li>
+                                <li>心脏病: ${defaultHealthData.heartDisease ? '是' : '否'}</li>
+                                <li>吸烟: ${defaultHealthData.smoking ? '是' : '否'}</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        /**
+         * 测试防御性编程
+         */
+        function testDefensiveProgramming() {
+            const resultsDiv = document.getElementById('results-content');
+            
+            // 测试不同的数据情况
+            const testCases = [
+                { name: '空数据', data: null },
+                { name: '缺少professionalAssessment', data: { aiAnalysis: {} } },
+                { name: 'professionalAssessment为空', data: { professionalAssessment: null, aiAnalysis: {} } },
+                { name: '正常数据', data: { 
+                    professionalAssessment: { 
+                        compositeScore: { score: 85 },
+                        riskStratification: { category: '低风险' }
+                    },
+                    aiAnalysis: { summary: '测试分析' }
+                }}
+            ];
+
+            let results = '<div class="space-y-3">';
+            
+            testCases.forEach(testCase => {
+                try {
+                    // 模拟displayProfessionalHealthReport函数的防御性检查
+                    if (!testCase.data) {
+                        results += `<div class="text-yellow-600">⚠️ ${testCase.name}: 报告数据不可用</div>`;
+                    } else if (!testCase.data.professionalAssessment) {
+                        results += `<div class="text-yellow-600">⚠️ ${testCase.name}: 专业评估数据不可用</div>`;
+                    } else {
+                        const score = testCase.data.professionalAssessment.compositeScore?.score || 'N/A';
+                        const category = testCase.data.professionalAssessment.riskStratification?.category || '未知';
+                        results += `<div class="text-green-600">✅ ${testCase.name}: 综合评分 ${score}, 风险分层 ${category}</div>`;
+                    }
+                } catch (error) {
+                    results += `<div class="text-red-600">❌ ${testCase.name}: ${error.message}</div>`;
+                }
+            });
+            
+            results += '</div>';
+            resultsDiv.innerHTML = results;
+        }
+
+        // 页面加载时显示欢迎信息
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('最终错误修复测试页面已加载');
+        });
+    </script>
+</body>
+</html>

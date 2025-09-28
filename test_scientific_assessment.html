@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>科學健康評估測試</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="scientific_health_assessment.js"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-gray-800 mb-8">科學健康評估系統測試</h1>
+        
+        <!-- 測試數據輸入 -->
+        <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+            <h2 class="text-xl font-semibold mb-4">測試數據輸入</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">收縮壓 (mmHg)</label>
+                    <input type="number" id="systolic" class="w-full border border-gray-300 rounded px-3 py-2" value="120">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">舒張壓 (mmHg)</label>
+                    <input type="number" id="diastolic" class="w-full border border-gray-300 rounded px-3 py-2" value="80">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">血氧飽和度 (%)</label>
+                    <input type="number" id="spo2" class="w-full border border-gray-300 rounded px-3 py-2" value="98">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">灌注指數 (PI)</label>
+                    <input type="number" id="pi" step="0.1" class="w-full border border-gray-300 rounded px-3 py-2" value="1.5">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">體溫 (°C)</label>
+                    <input type="number" id="temperature" step="0.1" class="w-full border border-gray-300 rounded px-3 py-2" value="36.5">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">測量部位</label>
+                    <select id="location" class="w-full border border-gray-300 rounded px-3 py-2">
+                        <option value="腋下">腋下</option>
+                        <option value="口腔">口腔</option>
+                        <option value="直腸">直腸</option>
+                        <option value="耳溫">耳溫</option>
+                        <option value="額溫">額溫</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">脈搏 (bpm)</label>
+                    <input type="number" id="pulse" class="w-full border border-gray-300 rounded px-3 py-2" value="72">
+                </div>
+            </div>
+            <button onclick="runAssessment()" class="mt-4 bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">
+                運行科學評估
+            </button>
+        </div>
+
+        <!-- 評估結果 -->
+        <div id="assessment-result" class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-xl font-semibold mb-4">評估結果</h2>
+            <div class="text-gray-500">點擊上方按鈕開始評估...</div>
+        </div>
+    </div>
+
+    <script>
+        // 初始化科學健康評估系統
+        const scientificAssessment = new ScientificHealthAssessment();
+
+        /**
+         * 運行科學健康評估
+         */
+        async function runAssessment() {
+            try {
+                // 收集測試數據
+                const healthData = {
+                    bloodPressure: {
+                        systolic: parseInt(document.getElementById('systolic').value),
+                        diastolic: parseInt(document.getElementById('diastolic').value),
+                        pulse: parseInt(document.getElementById('pulse').value)
+                    },
+                    spO2: {
+                        percent: parseInt(document.getElementById('spo2').value),
+                        pi: parseFloat(document.getElementById('pi').value),
+                        pr: parseInt(document.getElementById('pulse').value)
+                    },
+                    temperature: {
+                        value: parseFloat(document.getElementById('temperature').value),
+                        location: document.getElementById('location').value
+                    }
+                };
+
+                console.log('輸入的健康數據:', healthData);
+
+                // 運行科學評估
+                const result = await scientificAssessment.generateComprehensiveAssessment(healthData);
+                
+                console.log('科學評估結果:', result);
+
+                // 顯示結果
+                displayAssessmentResult(result);
+
+            } catch (error) {
+                console.error('評估失敗:', error);
+                document.getElementById('assessment-result').innerHTML = `
+                    <div class="text-red-600">
+                        <h3 class="font-semibold">評估失敗</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        /**
+         * 顯示評估結果
+         */
+        function displayAssessmentResult(result) {
+            const container = document.getElementById('assessment-result');
+            
+            container.innerHTML = `
+                <div class="space-y-6">
+                    <!-- 綜合評分概覽 -->
+                    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-lg border border-blue-200">
+                        <h3 class="text-lg font-semibold text-blue-800 mb-4">綜合評分概覽</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div class="text-center">
+                                <div class="text-3xl font-bold text-blue-600">${result.compositeScore.score}</div>
+                                <div class="text-sm text-blue-700">綜合評分</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-3xl font-bold text-${getRiskColor(result.riskStratification.category)}">${result.riskStratification.category}</div>
+                                <div class="text-sm text-gray-700">風險分層</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-3xl font-bold text-green-600">${result.compositeScore.confidence}%</div>
+                                <div class="text-sm text-gray-700">評估置信度</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-3xl font-bold text-purple-600">${result.compositeScore.grade}</div>
+                                <div class="text-sm text-gray-700">健康等級</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 基礎生命體徵評估 -->
+                    <div class="bg-white p-6 rounded-lg border border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">基礎生命體徵評估</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="p-4 bg-red-50 rounded-lg">
+                                <h4 class="font-medium text-red-800 mb-2">血壓評估</h4>
+                                <div class="text-sm text-red-700">
+                                    <div>分類: ${result.basicVitalSigns.bloodPressure.category}</div>
+                                    <div>風險等級: ${result.basicVitalSigns.bloodPressure.riskLevel}</div>
+                                    <div>評估: ${result.basicVitalSigns.bloodPressure.assessment}</div>
+                                </div>
+                            </div>
+                            <div class="p-4 bg-green-50 rounded-lg">
+                                <h4 class="font-medium text-green-800 mb-2">血氧評估</h4>
+                                <div class="text-sm text-green-700">
+                                    <div>分類: ${result.basicVitalSigns.bloodOxygen.category}</div>
+                                    <div>風險等級: ${result.basicVitalSigns.bloodOxygen.riskLevel}</div>
+                                    <div>評估: ${result.basicVitalSigns.bloodOxygen.assessment}</div>
+                                </div>
+                            </div>
+                            <div class="p-4 bg-orange-50 rounded-lg">
+                                <h4 class="font-medium text-orange-800 mb-2">體溫評估</h4>
+                                <div class="text-sm text-orange-700">
+                                    <div>分類: ${result.basicVitalSigns.temperature.category}</div>
+                                    <div>風險等級: ${result.basicVitalSigns.temperature.riskLevel}</div>
+                                    <div>評估: ${result.basicVitalSigns.temperature.assessment}</div>
+                                </div>
+                            </div>
+                            <div class="p-4 bg-blue-50 rounded-lg">
+                                <h4 class="font-medium text-blue-800 mb-2">脈搏評估</h4>
+                                <div class="text-sm text-blue-700">
+                                    <div>分類: ${result.basicVitalSigns.pulse.category}</div>
+                                    <div>風險等級: ${result.basicVitalSigns.pulse.riskLevel}</div>
+                                    <div>評估: ${result.basicVitalSigns.pulse.assessment}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 子模型評估 -->
+                    <div class="bg-white p-6 rounded-lg border border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">子模型評估結果</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between p-4 bg-red-50 rounded-lg">
+                                <div>
+                                    <span class="font-medium text-red-800">血壓穩定性子模型</span>
+                                    <div class="text-sm text-red-700 mt-1">${result.subModelAssessments.bloodPressureStability.assessment || '無數據'}</div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-lg font-bold text-red-600">${(result.subModelAssessments.bloodPressureStability.score * 100).toFixed(0)}分</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between p-4 bg-green-50 rounded-lg">
+                                <div>
+                                    <span class="font-medium text-green-800">血氧灌注子模型</span>
+                                    <div class="text-sm text-green-700 mt-1">${result.subModelAssessments.bloodOxygenPerfusion.assessment || '無數據'}</div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-lg font-bold text-green-600">${(result.subModelAssessments.bloodOxygenPerfusion.score * 100).toFixed(0)}分</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between p-4 bg-orange-50 rounded-lg">
+                                <div>
+                                    <span class="font-medium text-orange-800">體溫-脈搏協同子模型</span>
+                                    <div class="text-sm text-orange-700 mt-1">${result.subModelAssessments.temperaturePulseSynergy.assessment || '無數據'}</div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-lg font-bold text-orange-600">${(result.subModelAssessments.temperaturePulseSynergy.score * 100).toFixed(0)}分</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 邏輯推導洞察 -->
+                    ${result.derivedInsights.insights.length > 0 ? `
+                    <div class="bg-yellow-50 p-6 rounded-lg border border-yellow-200">
+                        <h3 class="text-lg font-semibold text-yellow-800 mb-4">邏輯推導洞察</h3>
+                        <div class="space-y-3">
+                            ${result.derivedInsights.insights.map(insight => `
+                                <div class="p-4 bg-white rounded border-l-4 border-yellow-400">
+                                    <div class="font-medium text-gray-800 mb-2">${insight.insight}</div>
+                                    <div class="text-sm text-gray-600 mb-1">置信度: ${insight.confidence} | ${insight.recommendation}</div>
+                                    <div class="text-xs text-gray-500 mb-1">推導邏輯: ${insight.derivation}</div>
+                                    <div class="text-xs text-gray-500">參考: ${insight.reference}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    ` : ''}
+
+                    <!-- 個性化建議 -->
+                    <div class="bg-green-50 p-6 rounded-lg border border-green-200">
+                        <h3 class="text-lg font-semibold text-green-800 mb-4">個性化建議</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <h4 class="font-medium text-green-700 mb-2">立即建議</h4>
+                                <ul class="text-sm text-gray-700 space-y-1">
+                                    ${result.personalizedRecommendations.immediate.map(rec => `<li>• ${rec}</li>`).join('')}
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-green-700 mb-2">生活方式</h4>
+                                <ul class="text-sm text-gray-700 space-y-1">
+                                    ${result.personalizedRecommendations.lifestyle.map(rec => `<li>• ${rec}</li>`).join('')}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 算法透明度 -->
+                    <div class="bg-gray-50 p-6 rounded-lg border border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">算法透明度報告</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <h4 class="font-medium text-gray-700 mb-2">數據來源</h4>
+                                <ul class="text-sm text-gray-600 space-y-1">
+                                    ${result.transparencyReport.dataSources.map(source => `<li>• ${source}</li>`).join('')}
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-gray-700 mb-2">評估方法</h4>
+                                <ul class="text-sm text-gray-600 space-y-1">
+                                    ${result.transparencyReport.assessmentMethods.map(method => `<li>• ${method}</li>`).join('')}
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <h4 class="font-medium text-gray-700 mb-2">推導邏輯</h4>
+                            <ul class="text-sm text-gray-600 space-y-1">
+                                ${result.transparencyReport.derivationLogic.map(logic => `<li>• ${logic}</li>`).join('')}
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- 數據限制說明 -->
+                    <div class="bg-orange-50 p-6 rounded-lg border border-orange-200">
+                        <h3 class="text-lg font-semibold text-orange-800 mb-4">評估限制說明</h3>
+                        <div class="text-sm text-gray-700">
+                            <ul class="list-disc list-inside space-y-1">
+                                ${result.dataLimitations.map(limitation => `<li>${limitation}</li>`).join('')}
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- 原始數據 -->
+                    <div class="bg-gray-100 p-6 rounded-lg">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">原始評估數據</h3>
+                        <pre class="text-xs text-gray-600 overflow-auto">${JSON.stringify(result, null, 2)}</pre>
+                    </div>
+                </div>
+            `;
+        }
+
+        /**
+         * 獲取風險顏色
+         */
+        function getRiskColor(riskCategory) {
+            const colors = {
+                'low': 'green-600',
+                'moderate': 'yellow-600',
+                'high': 'orange-600',
+                'very_high': 'red-600'
+            };
+            return colors[riskCategory] || 'gray-600';
+        }
+    </script>
+</body>
+</html>

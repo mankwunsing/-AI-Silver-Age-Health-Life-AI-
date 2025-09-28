@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>基本功能測試</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <style>
+        .input-field {
+            @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+        }
+        .card {
+            @apply bg-white rounded-xl shadow-lg p-6;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">基本功能測試</h1>
+        
+        <!-- 按鈕測試 -->
+        <div class="card mb-6">
+            <h2 class="text-xl font-semibold mb-4">按鈕功能測試</h2>
+            <div class="space-y-4">
+                <button onclick="testBasicFunction()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                    <i class="fa fa-check mr-2"></i>基本功能測試
+                </button>
+                <button onclick="testLocalStorage()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                    <i class="fa fa-database mr-2"></i>本地存儲測試
+                </button>
+                <button onclick="testDeviceData()" class="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600">
+                    <i class="fa fa-heartbeat mr-2"></i>設備數據測試
+                </button>
+            </div>
+        </div>
+
+        <!-- 智能設備數據錄入測試 -->
+        <div class="card mb-6">
+            <h2 class="text-xl font-semibold mb-4">智能設備數據錄入測試</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">收縮壓 (mmHg)</label>
+                    <input type="number" id="test-systolic" placeholder="120" class="input-field" min="60" max="250">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">舒張壓 (mmHg)</label>
+                    <input type="number" id="test-diastolic" placeholder="80" class="input-field" min="40" max="150">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">脈搏 (bpm)</label>
+                    <input type="number" id="test-pulse" placeholder="72" class="input-field" min="30" max="200">
+                </div>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-base mb-2">測量時間</label>
+                    <input type="datetime-local" id="test-time" class="input-field">
+                </div>
+                <div>
+                    <label class="block text-base mb-2">備註</label>
+                    <textarea id="test-notes" placeholder="例如：餐後測量、運動後測量等" class="input-field" rows="3"></textarea>
+                </div>
+                <button onclick="testSaveDeviceData()" class="w-full py-4 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl text-lg font-bold hover:from-green-600 hover:to-green-700 transition-all duration-300 shadow-xl border-2 border-green-400 transform hover:scale-105">
+                    <i class="fa fa-save mr-2 text-xl"></i> 💾 保存设备数据
+                </button>
+            </div>
+        </div>
+
+        <!-- 測試結果 -->
+        <div class="card">
+            <h2 class="text-xl font-semibold mb-4">測試結果</h2>
+            <div id="test-results" class="bg-gray-50 p-4 rounded text-sm font-mono">
+                <p class="text-gray-500">點擊上方按鈕進行測試...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 基本功能測試
+        function testBasicFunction() {
+            const resultDiv = document.getElementById('test-results');
+            resultDiv.innerHTML = '<div class="text-green-600">✅ 基本功能正常！JavaScript 運行正常。</div>';
+        }
+
+        // 本地存儲測試
+        function testLocalStorage() {
+            try {
+                const testData = { test: 'data', timestamp: new Date().toISOString() };
+                localStorage.setItem('test', JSON.stringify(testData));
+                const retrieved = JSON.parse(localStorage.getItem('test'));
+                
+                if (retrieved.test === 'data') {
+                    document.getElementById('test-results').innerHTML = '<div class="text-green-600">✅ 本地存儲功能正常！</div>';
+                } else {
+                    document.getElementById('test-results').innerHTML = '<div class="text-red-600">❌ 本地存儲數據不匹配</div>';
+                }
+            } catch (error) {
+                document.getElementById('test-results').innerHTML = `<div class="text-red-600">❌ 本地存儲錯誤: ${error.message}</div>`;
+            }
+        }
+
+        // 設備數據測試
+        function testDeviceData() {
+            try {
+                const deviceData = {
+                    id: Date.now(),
+                    type: '血压',
+                    device: '血压计',
+                    time: new Date().toISOString().slice(0, 16),
+                    notes: '測試數據',
+                    timestamp: new Date().toISOString(),
+                    data: {
+                        systolic: 120,
+                        diastolic: 80,
+                        pulse: 72,
+                        assessment: {
+                            level: '正常',
+                            advice: '血壓正常'
+                        }
+                    }
+                };
+                
+                const healthRecords = JSON.parse(localStorage.getItem('healthRecords') || '[]');
+                healthRecords.push(deviceData);
+                localStorage.setItem('healthRecords', JSON.stringify(healthRecords));
+                
+                document.getElementById('test-results').innerHTML = '<div class="text-green-600">✅ 設備數據保存成功！</div>';
+            } catch (error) {
+                document.getElementById('test-results').innerHTML = `<div class="text-red-600">❌ 設備數據錯誤: ${error.message}</div>`;
+            }
+        }
+
+        // 保存設備數據測試
+        function testSaveDeviceData() {
+            const systolic = parseInt(document.getElementById('test-systolic').value);
+            const diastolic = parseInt(document.getElementById('test-diastolic').value);
+            const pulse = parseInt(document.getElementById('test-pulse').value);
+            const time = document.getElementById('test-time').value || new Date().toISOString().slice(0, 16);
+            const notes = document.getElementById('test-notes').value;
+            
+            if (!systolic || !diastolic || !pulse) {
+                document.getElementById('test-results').innerHTML = '<div class="text-red-600">❌ 請填寫完整的血壓數據</div>';
+                return;
+            }
+            
+            try {
+                const deviceData = {
+                    id: Date.now(),
+                    type: '血压',
+                    device: '血压计',
+                    time: time,
+                    notes: notes,
+                    timestamp: new Date().toISOString(),
+                    data: {
+                        systolic: systolic,
+                        diastolic: diastolic,
+                        pulse: pulse,
+                        assessment: {
+                            level: systolic < 120 && diastolic < 80 ? '正常' : '偏高',
+                            advice: systolic < 120 && diastolic < 80 ? '血壓正常' : '血壓偏高'
+                        }
+                    }
+                };
+                
+                const healthRecords = JSON.parse(localStorage.getItem('healthRecords') || '[]');
+                healthRecords.push(deviceData);
+                localStorage.setItem('healthRecords', JSON.stringify(healthRecords));
+                
+                // 清空表單
+                document.getElementById('test-systolic').value = '';
+                document.getElementById('test-diastolic').value = '';
+                document.getElementById('test-pulse').value = '';
+                document.getElementById('test-time').value = '';
+                document.getElementById('test-notes').value = '';
+                
+                document.getElementById('test-results').innerHTML = '<div class="text-green-600">✅ 設備數據保存成功！表單已清空。</div>';
+            } catch (error) {
+                document.getElementById('test-results').innerHTML = `<div class="text-red-600">❌ 保存失敗: ${error.message}</div>`;
+            }
+        }
+
+        // 頁面加載完成後設置默認時間
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const timeString = now.toISOString().slice(0, 16);
+            document.getElementById('test-time').value = timeString;
+        });
+    </script>
+</body>
+</html>

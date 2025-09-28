@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能設備數據錄入診斷</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <style>
+        .input-field {
+            @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+        }
+        .card {
+            @apply bg-white rounded-xl shadow-lg p-6;
+        }
+        .bg-primary {
+            background-color: #3B82F6;
+        }
+        .bg-primary:hover {
+            background-color: #2563EB;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">智能設備數據錄入診斷工具</h1>
+        
+        <!-- 診斷結果 -->
+        <div class="card mb-6">
+            <h2 class="text-xl font-semibold mb-4">診斷結果</h2>
+            <div id="diagnosis-results" class="space-y-2">
+                <div class="flex items-center">
+                    <i class="fa fa-spinner fa-spin text-blue-500 mr-2"></i>
+                    <span>正在診斷...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 簡化版智能設備數據錄入 -->
+        <div class="card mb-6">
+            <h2 class="text-xl font-semibold mb-4">簡化版智能設備數據錄入</h2>
+            
+            <!-- 血壓數據錄入 -->
+            <div class="mb-4">
+                <h3 class="text-lg font-medium mb-2">血壓數據</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">收縮壓 (mmHg)</label>
+                        <input type="number" id="test-systolic" placeholder="120" class="input-field" min="60" max="250">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">舒張壓 (mmHg)</label>
+                        <input type="number" id="test-diastolic" placeholder="80" class="input-field" min="40" max="150">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">脈搏 (bpm)</label>
+                        <input type="number" id="test-pulse" placeholder="72" class="input-field" min="30" max="200">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 通用信息 -->
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-base mb-2">測量時間</label>
+                    <input type="datetime-local" id="test-time" class="input-field">
+                </div>
+                <div>
+                    <label class="block text-base mb-2">備註</label>
+                    <textarea id="test-notes" placeholder="例如：餐後測量、運動後測量等" class="input-field" rows="3"></textarea>
+                </div>
+                
+                <!-- 多個測試按鈕 -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <button onclick="testDirectSave()" class="py-3 bg-green-500 text-white rounded-xl text-base font-semibold hover:bg-green-600 transition-colors">
+                        <i class="fa fa-save mr-2"></i>直接保存測試
+                    </button>
+                    <button onclick="testHandleAction()" class="py-3 bg-blue-500 text-white rounded-xl text-base font-semibold hover:bg-blue-600 transition-colors">
+                        <i class="fa fa-cog mr-2"></i>handleAction 測試
+                    </button>
+                    <button onclick="testFormValidation()" class="py-3 bg-purple-500 text-white rounded-xl text-base font-semibold hover:bg-purple-600 transition-colors">
+                        <i class="fa fa-check mr-2"></i>表單驗證測試
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 測試結果 -->
+        <div class="card">
+            <h2 class="text-xl font-semibold mb-4">測試結果</h2>
+            <div id="test-results" class="bg-gray-50 p-4 rounded text-sm font-mono"></div>
+        </div>
+    </div>
+
+    <script>
+        // 診斷函數
+        function runDiagnosis() {
+            const results = [];
+            
+            // 檢查必要的函數是否存在
+            const functions = ['addDeviceData', 'handleAction', 'switchDeviceTab'];
+            functions.forEach(func => {
+                if (typeof window[func] === 'function') {
+                    results.push(`✅ ${func} 函數存在`);
+                } else {
+                    results.push(`❌ ${func} 函數不存在`);
+                }
+            });
+            
+            // 檢查必要的元素是否存在
+            const elements = ['device-time', 'device-notes', 'bp-systolic', 'bp-diastolic', 'bp-pulse'];
+            elements.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    results.push(`✅ 元素 #${id} 存在`);
+                } else {
+                    results.push(`❌ 元素 #${id} 不存在`);
+                }
+            });
+            
+            // 檢查 localStorage 是否可用
+            try {
+                localStorage.setItem('test', 'test');
+                localStorage.removeItem('test');
+                results.push(`✅ localStorage 可用`);
+            } catch (e) {
+                results.push(`❌ localStorage 不可用: ${e.message}`);
+            }
+            
+            // 檢查控制台錯誤
+            const originalError = console.error;
+            const errors = [];
+            console.error = function(...args) {
+                errors.push(args.join(' '));
+                originalError.apply(console, args);
+            };
+            
+            // 恢復原始 console.error
+            setTimeout(() => {
+                console.error = originalError;
+                if (errors.length > 0) {
+                    results.push(`⚠️ 發現 ${errors.length} 個控制台錯誤`);
+                } else {
+                    results.push(`✅ 沒有控制台錯誤`);
+                }
+                
+                displayDiagnosisResults(results);
+            }, 1000);
+        }
+
+        function displayDiagnosisResults(results) {
+            const container = document.getElementById('diagnosis-results');
+            container.innerHTML = results.map(result => {
+                const isError = result.includes('❌');
+                const isWarning = result.includes('⚠️');
+                const color = isError ? 'text-red-600' : isWarning ? 'text-yellow-600' : 'text-green-600';
+                return `<div class="flex items-center ${color}"><span>${result}</span></div>`;
+            }).join('');
+        }
+
+        // 測試函數
+        function testDirectSave() {
+            const systolic = parseInt(document.getElementById('test-systolic').value);
+            const diastolic = parseInt(document.getElementById('test-diastolic').value);
+            const pulse = parseInt(document.getElementById('test-pulse').value);
+            const time = document.getElementById('test-time').value || new Date().toISOString().slice(0, 16);
+            const notes = document.getElementById('test-notes').value;
+            
+            if (!systolic || !diastolic || !pulse) {
+                showTestResult('❌ 請填寫完整的血壓數據', 'error');
+                return;
+            }
+            
+            const deviceData = {
+                id: Date.now(),
+                type: '血压',
+                device: '血压计',
+                time: time,
+                notes: notes,
+                timestamp: new Date().toISOString(),
+                data: {
+                    systolic: systolic,
+                    diastolic: diastolic,
+                    pulse: pulse,
+                    assessment: {
+                        level: systolic < 120 && diastolic < 80 ? '正常' : '偏高',
+                        advice: systolic < 120 && diastolic < 80 ? '血壓正常' : '血壓偏高'
+                    }
+                }
+            };
+            
+            try {
+                const healthRecords = JSON.parse(localStorage.getItem('healthRecords') || '[]');
+                healthRecords.push(deviceData);
+                localStorage.setItem('healthRecords', JSON.stringify(healthRecords));
+                showTestResult('✅ 直接保存成功！數據已保存到 localStorage', 'success');
+            } catch (error) {
+                showTestResult(`❌ 直接保存失敗: ${error.message}`, 'error');
+            }
+        }
+
+        function testHandleAction() {
+            // 模擬 handleAction 函數
+            if (typeof window.handleAction === 'function') {
+                try {
+                    window.handleAction('addDeviceData');
+                    showTestResult('✅ handleAction 調用成功', 'success');
+                } catch (error) {
+                    showTestResult(`❌ handleAction 調用失敗: ${error.message}`, 'error');
+                }
+            } else {
+                showTestResult('❌ handleAction 函數不存在', 'error');
+            }
+        }
+
+        function testFormValidation() {
+            const systolic = document.getElementById('test-systolic').value;
+            const diastolic = document.getElementById('test-diastolic').value;
+            const pulse = document.getElementById('test-pulse').value;
+            
+            let result = '表單驗證結果：\n';
+            result += `收縮壓: ${systolic ? '✅ 已填寫' : '❌ 未填寫'}\n`;
+            result += `舒張壓: ${diastolic ? '✅ 已填寫' : '❌ 未填寫'}\n`;
+            result += `脈搏: ${pulse ? '✅ 已填寫' : '❌ 未填寫'}\n`;
+            
+            if (systolic && diastolic && pulse) {
+                result += '\n✅ 表單驗證通過，可以保存數據';
+                showTestResult(result, 'success');
+            } else {
+                result += '\n❌ 表單驗證失敗，請填寫完整數據';
+                showTestResult(result, 'error');
+            }
+        }
+
+        function showTestResult(message, type) {
+            const colors = {
+                success: 'text-green-600',
+                error: 'text-red-600',
+                info: 'text-blue-600'
+            };
+            
+            const resultDiv = document.getElementById('test-results');
+            resultDiv.innerHTML = `<div class="${colors[type]}">${message.replace(/\n/g, '<br>')}</div>`;
+        }
+
+        // 頁面加載完成後自動診斷
+        document.addEventListener('DOMContentLoaded', function() {
+            // 設置默認時間
+            const now = new Date();
+            const timeString = now.toISOString().slice(0, 16);
+            document.getElementById('test-time').value = timeString;
+            
+            // 運行診斷
+            runDiagnosis();
+        });
+    </script>
+</body>
+</html>

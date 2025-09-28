@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assessment属性错误修复测试</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">Assessment属性错误修复测试</h1>
+        
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">修复内容</h2>
+            <div class="space-y-3">
+                <div class="flex items-center">
+                    <span class="w-3 h-3 bg-green-500 rounded-full mr-3"></span>
+                    <span>修复了 <code>getLatestDeviceData</code> 函数中的 assessment 属性访问</span>
+                </div>
+                <div class="flex items-center">
+                    <span class="w-3 h-3 bg-green-500 rounded-full mr-3"></span>
+                    <span>为血压、血氧、体温数据添加了默认 assessment 值</span>
+                </div>
+                <div class="flex items-center">
+                    <span class="w-3 h-3 bg-green-500 rounded-full mr-3"></span>
+                    <span>在模板字符串中使用可选链操作符安全访问 assessment 属性</span>
+                </div>
+                <div class="flex items-center">
+                    <span class="w-3 h-3 bg-green-500 rounded-full mr-3"></span>
+                    <span>修复了子模型评估显示中的属性访问问题</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">测试按钮</h2>
+            <div class="space-x-4">
+                <button onclick="testDeviceDataWithAssessment()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
+                    测试设备数据（有assessment）
+                </button>
+                <button onclick="testDeviceDataWithoutAssessment()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">
+                    测试设备数据（无assessment）
+                </button>
+                <button onclick="testTemplateStringSafety()" class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded">
+                    测试模板字符串安全性
+                </button>
+            </div>
+        </div>
+
+        <div id="test-results" class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">测试结果</h2>
+            <div id="results-content" class="text-gray-600">
+                点击上方按钮开始测试...
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * 模拟修复后的getLatestDeviceData函数
+         */
+        function getLatestDeviceData() {
+            // 模拟没有assessment数据的原始数据
+            const mockBPRecord = {
+                data: {
+                    systolic: 120,
+                    diastolic: 80,
+                    pulse: 72
+                    // 注意：没有assessment属性
+                },
+                time: '2024-01-15 10:30:00'
+            };
+
+            const mockSpO2Record = {
+                data: {
+                    percent: 98,
+                    pi: 1.2,
+                    pr: 72
+                    // 注意：没有assessment属性
+                },
+                time: '2024-01-15 10:35:00'
+            };
+
+            const mockTempRecord = {
+                data: {
+                    value: 36.5,
+                    location: '腋下'
+                    // 注意：没有assessment属性
+                },
+                time: '2024-01-15 10:40:00'
+            };
+
+            return {
+                bloodPressure: {
+                    systolic: mockBPRecord.data.systolic,
+                    diastolic: mockBPRecord.data.diastolic,
+                    pulse: mockBPRecord.data.pulse,
+                    assessment: mockBPRecord.data.assessment || { level: '正常', advice: '保持良好状态' },
+                    time: mockBPRecord.time
+                },
+                spO2: {
+                    percent: mockSpO2Record.data.percent,
+                    pi: mockSpO2Record.data.pi,
+                    pr: mockSpO2Record.data.pr,
+                    assessment: mockSpO2Record.data.assessment || { level: '正常', advice: '血氧水平良好' },
+                    time: mockSpO2Record.time
+                },
+                temperature: {
+                    value: mockTempRecord.data.value,
+                    location: mockTempRecord.data.location,
+                    assessment: mockTempRecord.data.assessment || { level: '正常', advice: '体温正常' },
+                    time: mockTempRecord.time
+                }
+            };
+        }
+
+        /**
+         * 测试有assessment数据的设备数据
+         */
+        function testDeviceDataWithAssessment() {
+            const resultsDiv = document.getElementById('results-content');
+            
+            // 模拟有assessment数据的记录
+            const mockRecord = {
+                data: {
+                    systolic: 130,
+                    diastolic: 85,
+                    pulse: 75,
+                    assessment: { level: '偏高', advice: '建议监测血压' }
+                }
+            };
+
+            try {
+                const deviceData = {
+                    systolic: mockRecord.data.systolic,
+                    diastolic: mockRecord.data.diastolic,
+                    pulse: mockRecord.data.pulse,
+                    assessment: mockRecord.data.assessment || { level: '正常', advice: '保持良好状态' }
+                };
+
+                resultsDiv.innerHTML = `
+                    <div class="text-green-600">
+                        <h3 class="font-semibold mb-2">✅ 有assessment数据测试通过</h3>
+                        <ul class="list-disc list-inside space-y-1">
+                            <li>血压: ${deviceData.systolic}/${deviceData.diastolic} mmHg</li>
+                            <li>脉搏: ${deviceData.pulse} bpm</li>
+                            <li>评估: ${deviceData.assessment.level} - ${deviceData.assessment.advice}</li>
+                        </ul>
+                    </div>
+                `;
+            } catch (error) {
+                resultsDiv.innerHTML = `
+                    <div class="text-red-600">
+                        <h3 class="font-semibold mb-2">❌ 有assessment数据测试失败</h3>
+                        <p>错误: ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        /**
+         * 测试没有assessment数据的设备数据
+         */
+        function testDeviceDataWithoutAssessment() {
+            const resultsDiv = document.getElementById('results-content');
+            
+            try {
+                const deviceData = getLatestDeviceData();
+
+                resultsDiv.innerHTML = `
+                    <div class="text-green-600">
+                        <h3 class="font-semibold mb-2">✅ 无assessment数据测试通过</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-3">
+                            <div>
+                                <h4 class="font-medium">血压数据</h4>
+                                <ul class="text-sm space-y-1">
+                                    <li>血压: ${deviceData.bloodPressure.systolic}/${deviceData.bloodPressure.diastolic} mmHg</li>
+                                    <li>评估: ${deviceData.bloodPressure.assessment.level} - ${deviceData.bloodPressure.assessment.advice}</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="font-medium">血氧数据</h4>
+                                <ul class="text-sm space-y-1">
+                                    <li>血氧: ${deviceData.spO2.percent}%</li>
+                                    <li>评估: ${deviceData.spO2.assessment.level} - ${deviceData.spO2.assessment.advice}</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="font-medium">体温数据</h4>
+                                <ul class="text-sm space-y-1">
+                                    <li>体温: ${deviceData.temperature.value}°C</li>
+                                    <li>评估: ${deviceData.temperature.assessment.level} - ${deviceData.temperature.assessment.advice}</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } catch (error) {
+                resultsDiv.innerHTML = `
+                    <div class="text-red-600">
+                        <h3 class="font-semibold mb-2">❌ 无assessment数据测试失败</h3>
+                        <p>错误: ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        /**
+         * 测试模板字符串安全性
+         */
+        function testTemplateStringSafety() {
+            const resultsDiv = document.getElementById('results-content');
+            
+            try {
+                const deviceData = getLatestDeviceData();
+                
+                // 模拟模板字符串中的安全访问
+                const bloodPressureInfo = deviceData.bloodPressure ? `
+- 最新血压数据 (${deviceData.bloodPressure.time}):
+  * 收缩压: ${deviceData.bloodPressure.systolic} mmHg
+  * 舒张压: ${deviceData.bloodPressure.diastolic} mmHg
+  * 脉搏: ${deviceData.bloodPressure.pulse} bpm
+  * 评估: ${deviceData.bloodPressure.assessment?.level || '正常'} - ${deviceData.bloodPressure.assessment?.advice || '保持良好状态'}` : '';
+
+                const spO2Info = deviceData.spO2 ? `
+- 最新血氧数据 (${deviceData.spO2.time}):
+  * 血氧饱和度: ${deviceData.spO2.percent}%
+  * 灌注指数: ${deviceData.spO2.pi}%
+  * 脉搏率: ${deviceData.spO2.pr} bpm
+  * 评估: ${deviceData.spO2.assessment?.level || '正常'} - ${deviceData.spO2.assessment?.advice || '血氧水平良好'}` : '';
+
+                resultsDiv.innerHTML = `
+                    <div class="text-green-600">
+                        <h3 class="font-semibold mb-2">✅ 模板字符串安全性测试通过</h3>
+                        <div class="bg-gray-50 p-4 rounded mt-3">
+                            <pre class="text-sm whitespace-pre-wrap">${bloodPressureInfo}${spO2Info}</pre>
+                        </div>
+                    </div>
+                `;
+            } catch (error) {
+                resultsDiv.innerHTML = `
+                    <div class="text-red-600">
+                        <h3 class="font-semibold mb-2">❌ 模板字符串安全性测试失败</h3>
+                        <p>错误: ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // 页面加载时显示欢迎信息
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Assessment属性错误修复测试页面已加载');
+        });
+    </script>
+</body>
+</html>

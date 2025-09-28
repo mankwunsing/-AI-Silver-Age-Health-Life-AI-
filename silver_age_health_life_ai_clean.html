@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>银龄康伴 AI - 专业健康管理助手</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
+        
+        .app-container { max-width: 450px; min-height: 800px; margin: 0 auto; height: 100vh; overflow: visible; }
+        .page-content { display: block; visibility: visible; opacity: 1; }
+        .btn-main { @apply w-full py-6 rounded-xl text-lg font-semibold shadow-md flex items-center justify-center transition-all duration-300 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]; }
+        .btn-secondary { @apply w-full py-4 rounded-xl text-base font-semibold transition-all duration-300; }
+        .card { @apply bg-white rounded-xl shadow-md p-5 mb-5 transform transition-all duration-300 hover:shadow-lg; }
+        .card-hover { @apply hover:translate-y-[-4px]; }
+        .input-field { @apply w-full p-4 border border-gray-200 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300; }
+        .text-title { @apply text-xl font-bold text-gray-800; }
+        .text-subtitle { @apply text-lg font-semibold text-gray-700; }
+        .text-small { @apply text-sm text-gray-500; }
+        .text-primary { @apply text-blue-600; }
+        .text-success { @apply text-green-600; }
+        .text-warning { @apply text-yellow-600; }
+        .text-danger { @apply text-red-600; }
+        .bg-primary { @apply bg-blue-600; }
+        .bg-success { @apply bg-green-600; }
+        .bg-warning { @apply bg-yellow-600; }
+        .bg-danger { @apply bg-red-600; }
+        .empty-state { @apply text-center py-8 text-gray-500; }
+        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .glass-morphism { backdrop-filter: blur(10px); background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); }
+        .neon-glow { text-shadow: 0 0 10px rgba(102, 126, 234, 0.5); }
+        .glow-effect { box-shadow: 0 0 20px rgba(102, 126, 234, 0.3); }
+        
+        /* 动画效果 */
+        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-10px); } }
+        @keyframes float3D { 0%, 100% { transform: translateY(0px) rotateX(0deg) rotateY(0deg); } 50% { transform: translateY(-10px) rotateX(5deg) rotateY(5deg); } }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+        @keyframes glow { 0%, 100% { box-shadow: 0 0 20px rgba(102, 126, 234, 0.3); } 50% { box-shadow: 0 0 30px rgba(102, 126, 234, 0.6); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideIn { from { transform: translateX(-100%); } to { transform: translateX(0); } }
+        @keyframes scaleIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        
+        .animate-float { animation: float 6s ease-in-out infinite; }
+        .animate-float3d { animation: float3D 8s ease-in-out infinite; }
+        .animate-pulse { animation: pulse 2s ease-in-out infinite; }
+        .animate-glow { animation: glow 3s ease-in-out infinite; }
+        .fade-in { animation: fadeIn 0.5s ease-out; }
+        .slide-in { animation: slideIn 0.3s ease-out; }
+        .scale-in { animation: scaleIn 0.3s ease-out; }
+        
+        /* 主题切换 */
+        .light-mode { background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%) !important; }
+        .light-mode .app-container { background: #ffffff !important; box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important; border: 1px solid #e2e8f0 !important; }
+        .light-mode .gradient-bg { background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%) !important; }
+        .light-mode .card { background: #ffffff !important; border: 1px solid #e2e8f0 !important; }
+        .light-mode .text-title { color: #1f2937 !important; }
+        .light-mode .text-subtitle { color: #374151 !important; }
+        .light-mode .text-small { color: #6b7280 !important; }
+        .light-mode .input-field { background: #ffffff !important; border-color: #d1d5db !important; color: #1f2937 !important; }
+        .light-mode .input-field:focus { border-color: #3b82f6 !important; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important; }
+    </style>
+</head>
+<body>
+    <!-- 主页容器 -->
+    <div class="app-container bg-white rounded-3xl shadow-xl relative">
+        <!-- 顶部状态栏 -->
+        <div class="gradient-bg text-white p-3 flex justify-between items-center">
+            <span class="text-sm font-medium" id="real-time">14:30</span>
+            <div class="flex space-x-3">
+                <i class="fa fa-signal text-sm"></i>
+                <i class="fa fa-wifi text-sm"></i>
+                <i class="fa fa-battery-three-quarters text-sm"></i>
+            </div>
+        </div>
+
+        <!-- 主页 -->
+        <div id="page-home" class="h-[calc(100vh-56px)] overflow-y-auto page-content">
+            <!-- 顶部欢迎区域 -->
+            <div class="gradient-bg p-6 text-white relative glass-morphism">
+                <div class="relative z-10">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h1 class="text-[clamp(1.5rem,5vw,2rem)] font-bold mb-2 neon-glow animate-glow">专业健康管理助手</h1>
+                            <p class="text-white/90 text-base animate-float">科学管理，健康生活</p>
+                        </div>
+                        <button onclick="handleAction('showSettingsPanel')" class="text-white/80 hover:text-white transition-colors">
+                            <i class="fa fa-cog text-xl"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 功能按钮区域 -->
+            <div class="p-5">
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <button onclick="handleAction('showPage', 'page-medicine')" class="btn-main bg-danger text-white card-hover glass-morphism animate-float3d transform-3d neon-glow">
+                        <i class="fa fa-pills text-3xl mb-2 block animate-glow"></i>
+                        <span class="animate-float">用药记录</span>
+                    </button>
+                    
+                    <button onclick="handleAction('showPage', 'page-exam')" class="btn-main bg-warning text-white card-hover glass-morphism neon-glow">
+                        <i class="fa fa-stethoscope text-3xl mb-2 block animate-glow"></i>
+                        <span class="animate-float">体检预约</span>
+                    </button>
+                    
+                    <button onclick="handleAction('showPage', 'page-diet')" class="btn-main bg-success text-white card-hover glass-morphism animate-float3d transform-3d neon-glow">
+                        <i class="fa fa-apple text-3xl mb-2 block animate-glow"></i>
+                        <span class="animate-float">饮食建议</span>
+                    </button>
+                    
+                    <button onclick="handleAction('showPage', 'page-exercise')" class="btn-main bg-primary text-white card-hover glass-morphism neon-glow">
+                        <i class="fa fa-heartbeat text-3xl mb-2 block animate-glow"></i>
+                        <span class="animate-float">运动记录</span>
+                    </button>
+                    
+                    <button onclick="handleAction('showPage', 'page-goals')" class="btn-main bg-warning text-white card-hover glass-morphism animate-float3d transform-3d neon-glow">
+                        <i class="fa fa-flag text-3xl mb-2 block animate-glow"></i>
+                        <span class="animate-float">健康目标</span>
+                    </button>
+                    
+                    <button onclick="handleAction('showPage', 'page-health-data')" class="btn-main bg-primary text-white card-hover glass-morphism neon-glow">
+                        <i class="fa fa-line-chart text-3xl mb-2 block animate-glow"></i>
+                        <span class="animate-float">健康数据</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 悬浮快捷操作 -->
+        <div class="fixed right-5 bottom-6 z-40 flex flex-col items-end space-y-3">
+            <button id="fab-add-record" class="rounded-full shadow-lg bg-primary text-white w-12 h-12 flex items-center justify-center hover:scale-105 transition-transform" title="添加記錄">
+                <i class="fa fa-plus"></i>
+            </button>
+            <button id="fab-view-report" class="rounded-full shadow-lg bg-white text-primary w-12 h-12 flex items-center justify-center hover:scale-105 transition-transform" title="查看報告">
+                <i class="fa fa-file-text-o"></i>
+            </button>
+            <button id="fab-open-ai" class="rounded-full shadow-lg bg-green-500 text-white w-12 h-12 flex items-center justify-center hover:scale-105 transition-transform" title="AI 助手">
+                <i class="fa fa-comments"></i>
+            </button>
+        </div>
+
+        <!-- 操作提示 -->
+        <div id="toast" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded-xl text-base shadow-lg hidden flex items-center fade-in">
+            <i class="fa fa-check-circle mr-2"></i>
+            <span id="toast-text">操作成功</span>
+        </div>
+    </div>
+
+    <!-- 功能页面容器 -->
+    <div class="app-container bg-white rounded-3xl shadow-xl relative">
+        <!-- 顶部状态栏 -->
+        <div class="gradient-bg text-white p-3 flex justify-between items-center">
+            <span class="text-sm font-medium" id="real-time-2">14:30</span>
+            <div class="flex space-x-3">
+                <i class="fa fa-signal text-sm"></i>
+                <i class="fa fa-wifi text-sm"></i>
+                <i class="fa fa-battery-three-quarters text-sm"></i>
+            </div>
+        </div>
+
+        <!-- 用药记录页面 -->
+        <div id="page-medicine" class="hidden h-[calc(100vh-56px)] overflow-y-auto p-5 page-content">
+            <div class="flex items-center mb-5">
+                <button onclick="handleAction('showPage', 'page-home')" class="text-primary mr-4"><i class="fa fa-arrow-left text-xl"></i></button>
+                <h2 class="text-title">用药记录管理</h2>
+            </div>
+            
+            <!-- 添加用药记录表单 -->
+            <div class="card mb-5">
+                <div class="card-header">
+                    <h3 class="text-title">添加用药记录</h3>
+                </div>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-base mb-2">药物名称</label>
+                        <input type="text" id="medicine-name" placeholder="例如：阿司匹林" class="input-field">
+                    </div>
+                    <div>
+                        <label class="block text-base mb-2">用药时间</label>
+                        <input type="datetime-local" id="medicine-time" class="input-field">
+                    </div>
+                    <div>
+                        <label class="block text-base mb-2">用药剂量</label>
+                        <input type="text" id="medicine-dose" placeholder="例如：100mg" class="input-field">
+                    </div>
+                    <div>
+                        <label class="block text-base mb-2">用药原因</label>
+                        <textarea id="medicine-reason" placeholder="例如：缓解头痛" class="input-field" rows="3"></textarea>
+                    </div>
+                    <button onclick="handleAction('addMedicineRecord')" class="w-full py-3 bg-primary text-white rounded-xl text-base font-semibold hover:bg-primary/90 transition-colors">
+                        <i class="fa fa-plus-circle mr-2"></i> 添加记录
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 用药记录历史 -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="text-title">用药记录历史</h3>
+                    <button onclick="handleAction('clearMedicineRecords')" class="text-danger text-sm hover:underline transition-all">
+                        <i class="fa fa-trash mr-1"></i> 清空
+                    </button>
+                </div>
+                <div id="medicine-records" class="space-y-3">
+                    <!-- 记录将动态生成 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 体检预约页面 -->
+        <div id="page-exam" class="hidden h-[calc(100vh-56px)] overflow-y-auto p-5 page-content">
+            <div class="flex items-center mb-5">
+                <button onclick="handleAction('showPage', 'page-home')" class="text-primary mr-4"><i class="fa fa-arrow-left text-xl"></i></button>
+                <h2 class="text-title">体检预约管理</h2>
+            </div>
+            
+            <!-- 添加体检预约表单 -->
+            <div class="card mb-5">
+                <div class="card-header">
+                    <h3 class="text-title">添加体检预约</h3>
+                </div>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-base mb-2">体检类型</label>
+                        <select id="exam-type" class="input-field">
+                            <option value="">请选择体检类型</option>
+                            <option value="常规体检">常规体检</option>
+                            <option value="心血管检查">心血管检查</option>
+                            <option value="血糖检查">血糖检查</option>
+                            <option value="血压检查">血压检查</option>
+                            <option value="眼科检查">眼科检查</option>
+                            <option value="口腔检查">口腔检查</option>
+                            <option value="其他">其他</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-base mb-2">预约日期</label>
+                        <input type="date" id="exam-date" class="input-field">
+                    </div>
+                    <div>
+                        <label class="block text-base mb-2">预约时间</label>
+                        <input type="time" id="exam-time" class="input-field">
+                    </div>
+                    <div>
+                        <label class="block text-base mb-2">医院/诊所</label>
+                        <input type="text" id="exam-hospital" placeholder="例如：市人民医院" class="input-field">
+                    </div>
+                    <div>
+                        <label class="block text-base mb-2">备注</label>
+                        <textarea id="exam-notes" placeholder="例如：需要空腹" class="input-field" rows="3"></textarea>
+                    </div>
+                    <button onclick="handleAction('addExamAppointment')" class="w-full py-3 bg-primary text-white rounded-xl text-base font-semibold hover:bg-primary/90 transition-colors">
+                        <i class="fa fa-calendar-plus-o mr-2"></i> 确认预约
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 体检预约历史 -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="text-title">历史体检记录</h3>
+                    <button onclick="handleAction('clearExamRecords')" class="text-danger text-sm hover:underline transition-all">
+                        <i class="fa fa-trash mr-1"></i> 清空历史
+                    </button>
+                </div>
+                <div id="exam-records" class="space-y-3">
+                    <!-- 记录将动态生成 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 饮食建议页面 -->
+        <div id="page-diet" class="hidden h-[calc(100vh-56px)] overflow-y-auto p-5 page-content">
+            <div class="flex items-center mb-5">
+                <button onclick="handleAction('showPage', 'page-home')" class="text-primary mr-4"><i class="fa fa-arrow-left text-xl"></i></button>
+                <h2 class="text-title">饮食健康管理</h2>
+            </div>
+            
+            <!-- 饮食记录表单 -->
+            <div class="card mb-5">
+                <div class="card-header">
+                    <h3 class="text-title">记录饮食</h3>
+                </div>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-base mb-2">用餐时间</label>
+                        <select id="meal-time" class="input-field">
+                            <option value="早餐">早餐</option>
+                            <option value="午餐">午餐</option>
+                            <option value="晚餐">晚餐</option>
+                            <option value="加餐">加餐</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-base mb-2">食物内容</label>
+                        <textarea id="food-content" placeholder="例如：白米饭、青菜、瘦肉" class="input-field" rows="3"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-base mb-2">用餐时间</label>
+                        <input type="datetime-local" id="diet-time" class="input-field">
+                    </div>
+                    <button onclick="handleAction('saveDietRecord')" class="w-full py-3 bg-primary text-white rounded-xl text-base font-semibold hover:bg-primary/90 transition-colors">
+                        <i class="fa fa-save mr-2"></i> 保存记录
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 饮食建议 -->
+            <div class="card mb-5">
+                <div class="card-header">
+                    <h3 class="text-title">个性化饮食建议</h3>
+                    <button onclick="handleAction('generateDietAdvice')" class="text-primary text-sm hover:underline transition-all">
+                        <i class="fa fa-refresh mr-1"></i> 更新建议
+                    </button>
+                </div>
+                <div id="diet-advice" class="text-base space-y-2">
+                    <p class="text-neutral-500">点击"更新建议"获取个性化饮食建议</p>
+                </div>
+            </div>
+            
+            <!-- 饮食记录历史 -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="text-title">饮食记录历史</h3>
+                </div>
+                <div id="diet-records" class="space-y-3">
+                    <!-- 记录将动态生成 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 运动记录页面 -->
+        <div id="page-exercise" class="hidden h-[calc(100vh-56px)] overflow-y-auto p-5 page-content">
+            <div class="flex items-center mb-5">
+                <button onclick="handleAction('showPage', 'page-home')" class="text-primary mr-4"><i class="fa fa-arrow-left text-xl"></i></button>
+                <h2 class="text-title">运动记录管理</h2>
+            </div>
+            
+            <!-- 添加运动记录表单 -->
+            <div class="card mb-5">
+                <div class="card-header">
+                    <h3 class="text-title">添加运动记录</h3>
+                </div>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-base mb-2">运动类型</label>
+                        <select id="exercise-type" class="input-field">
+                            <option value="">请选择运动类型</option>
+                            <option value="散步">散步</option>
+                            <option value="跑步">跑步</option>
+                            <option value="游泳">游泳</option>
+                            <option value="骑自行车">骑自行车</option>
+                            <option value="太极拳">太极拳</option>
+                            <option value="瑜伽">瑜伽</option>
+                            <option value="健身">健身</option>
+                            <option value="其他">其他</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-base mb-2">运动时长（分钟）</label>
+                        <input type="number" id="exercise-duration" placeholder="例如：30" class="input-field">
+                    </div>
+                    <div>
+                        <label class="block text-base mb-2">运动强度</label>
+                        <select id="exercise-intensity" class="input-field">
+                            <option value="低">低强度</option>
+                            <option value="中">中等强度</option>
+                            <option value="高">高强度</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-base mb-2">运动时间</label>
+                        <input type="datetime-local" id="exercise-time" class="input-field">
+                    </div>
+                    <div>
+                        <label class="block text-base mb-2">备注</label>
+                        <textarea id="exercise-notes" placeholder="例如：感觉很好" class="input-field" rows="3"></textarea>
+                    </div>
+                    <button onclick="handleAction('addExerciseRecord')" class="w-full py-3 bg-primary text-white rounded-xl text-base font-semibold hover:bg-primary/90 transition-colors">
+                        <i class="fa fa-plus-circle mr-2"></i> 添加记录
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 运动记录历史 -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="text-title">运动记录历史</h3>
+                    <button onclick="handleAction('clearExerciseRecords')" class="text-danger text-sm hover:underline transition-all">
+                        <i class="fa fa-trash mr-1"></i> 清空
+                    </button>
+                </div>
+                <div id="exercise-records" class="space-y-3">
+                    <!-- 记录将动态生成 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 健康目标页面 -->
+        <div id="page-goals" class="hidden h-[calc(100vh-56px)] overflow-y-auto p-5 page-content">
+            <div class="flex items-center mb-5">
+                <button onclick="handleAction('showPage', 'page-home')" class="text-primary mr-4"><i class="fa fa-arrow-left text-xl"></i></button>
+                <h2 class="text-title">健康目标管理</h2>
+            </div>
+            
+            <!-- 添加健康目标表单 -->
+            <div class="card mb-5">
+                <div class="card-header">
+                    <h3 class="text-title">添加健康目标</h3>
+                </div>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-base mb-2">目标类型</label>
+                        <select id="goal-type" class="input-field">
+                            <option value="">请选择目标类型</option>
+                            <option value="体重管理">体重管理</option>
+                            <option value="运动目标">运动目标</option>
+                            <option value="饮食目标">饮食目标</option>
+                            <option value="睡眠目标">睡眠目标</option>
+                            <option value="血压控制">血压控制</option>
+                            <option value="血糖控制">血糖控制</option>
+                            <option value="其他">其他</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-base mb-2">目标描述</label>
+                        <textarea id="goal-description" placeholder="例如：每天步行30分钟" class="input-field" rows="3"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-base mb-2">目标期限</label>
+                        <input type="date" id="goal-deadline" class="input-field">
+                    </div>
+                    <div>
+                        <label class="block text-base mb-2">目标优先级</label>
+                        <select id="goal-priority" class="input-field">
+                            <option value="低">低优先级</option>
+                            <option value="中">中等优先级</option>
+                            <option value="高">高优先级</option>
+                        </select>
+                    </div>
+                    <button onclick="handleAction('addHealthGoal')" class="w-full py-3 bg-primary text-white rounded-xl text-base font-semibold hover:bg-primary/90 transition-colors">
+                        <i class="fa fa-plus-circle mr-2"></i> 添加目标
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 健康目标列表 -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="text-title">我的健康目标</h3>
+                    <button onclick="handleAction('clearCompletedGoals')" class="text-success text-sm hover:underline transition-all">
+                        <i class="fa fa-check mr-1"></i> 清理已完成
+                    </button>
+                </div>
+                <div id="health-goals" class="space-y-3">
+                    <!-- 目标将动态生成 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 健康数据页面 -->
+        <div id="page-health-data" class="hidden h-[calc(100vh-56px)] overflow-y-auto p-5 page-content">
+            <div class="flex items-center mb-5">
+                <button onclick="handleAction('showPage', 'page-home')" class="text-primary mr-4"><i class="fa fa-arrow-left text-xl"></i></button>
+                <h2 class="text-title">健康数据管理</h2>
+            </div>
+            
+            <!-- 添加健康数据表单 -->
+            <div class="card mb-5">
+                <div class="card-header">
+                    <h3 class="text-title">添加健康数据</h3>
+                </div>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-base mb-2">数据类型</label>
+                        <select id="data-type" class="input-field">
+                            <option value="">请选择数据类型</option>
+                            <option value="血压">血压</option>
+                            <option value="心率">心率</option>
+                            <option value="血糖">血糖</option>
+                            <option value="体重">体重</option>
+                            <option value="体温">体温</option>
+                            <option value="血氧">血氧</option>
+                            <option value="其他">其他</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-base mb-2">数值</label>
+                        <input type="text" id="data-value" placeholder="例如：120/80" class="input-field">
+                    </div>
+                    <div>
+                        <label class="block text-base mb-2">测量时间</label>
+                        <input type="datetime-local" id="data-time" class="input-field">
+                    </div>
+                    <div>
+                        <label class="block text-base mb-2">备注</label>
+                        <textarea id="data-notes" placeholder="例如：餐后测量" class="input-field" rows="3"></textarea>
+                    </div>
+                    <button onclick="handleAction('addHealthRecord')" class="w-full py-3 bg-primary text-white rounded-xl text-base font-semibold hover:bg-primary/90 transition-colors">
+                        <i class="fa fa-plus-circle mr-2"></i> 添加数据
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 健康数据历史 -->
+            <div class="card mb-5">
+                <div class="card-header">
+                    <h3 class="text-title">健康数据历史</h3>
+                </div>
+                <div id="health-data-records" class="space-y-3">
+                    <!-- 记录将动态生成 -->
+                </div>
+            </div>
+            
+            <!-- 健康报告 -->
+            <div class="card mb-5 card-hover">
+                <div class="card-header">
+                    <h3 class="text-title">健康分析报告</h3>
+                    <button onclick="handleAction('generateHealthReport')" class="text-primary text-base hover:underline transition-all">
+                        <i class="fa fa-refresh mr-1"></i> 更新
+                    </button>
+                </div>
+                <div id="health-report" class="text-base space-y-2 empty-state">
+                    <i class="fa fa-file-text-o text-4xl mb-2"></i>
+                    <p class="text-base">暂无健康报告</p>
+                    <p class="text-small mt-1">添加健康数据后生成</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 页面切换功能
+        function showPage(pageId) {
+            console.log('切换到页面:', pageId);
+            
+            // 隐藏所有页面
+            const pages = document.querySelectorAll('[id^="page-"]');
+            pages.forEach(page => {
+                page.classList.add('hidden');
+                page.style.display = 'none';
+            });
+            
+            // 显示目标页面
+            const targetPage = document.getElementById(pageId);
+            if (targetPage) {
+                targetPage.classList.remove('hidden');
+                targetPage.style.display = 'block';
+                console.log('页面显示成功:', pageId);
+            } else {
+                console.error('页面未找到:', pageId);
+            }
+        }
+
+        // 操作处理函数
+        function handleAction(action, ...args) {
+            console.log('执行操作:', action, args);
+            
+            switch(action) {
+                case 'showPage':
+                    showPage(args[0]);
+                    break;
+                case 'addMedicineRecord':
+                    console.log('添加用药记录');
+                    break;
+                case 'clearMedicineRecords':
+                    console.log('清空用药记录');
+                    break;
+                case 'addExamAppointment':
+                    console.log('添加体检预约');
+                    break;
+                case 'clearExamRecords':
+                    console.log('清空体检记录');
+                    break;
+                case 'saveDietRecord':
+                    console.log('保存饮食记录');
+                    break;
+                case 'generateDietAdvice':
+                    console.log('生成饮食建议');
+                    break;
+                case 'addExerciseRecord':
+                    console.log('添加运动记录');
+                    break;
+                case 'clearExerciseRecords':
+                    console.log('清空运动记录');
+                    break;
+                case 'addHealthGoal':
+                    console.log('添加健康目标');
+                    break;
+                case 'clearCompletedGoals':
+                    console.log('清理已完成目标');
+                    break;
+                case 'addHealthRecord':
+                    console.log('添加健康数据');
+                    break;
+                case 'generateHealthReport':
+                    console.log('生成健康报告');
+                    break;
+                case 'showSettingsPanel':
+                    console.log('显示设置面板');
+                    break;
+                default:
+                    console.log('未知操作:', action);
+            }
+        }
+
+        // 初始化
+        function init() {
+            console.log('应用初始化');
+            showPage('page-home');
+            
+            // 更新时间
+            function updateTime() {
+                const now = new Date();
+                const timeString = now.toLocaleTimeString('zh-CN', { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                });
+                document.getElementById('real-time').textContent = timeString;
+                document.getElementById('real-time-2').textContent = timeString;
+            }
+            
+            updateTime();
+            setInterval(updateTime, 1000);
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

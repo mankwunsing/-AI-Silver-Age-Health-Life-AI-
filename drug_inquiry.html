@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>药物信息查询</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="max-w-lg mx-auto bg-white p-6 rounded-lg shadow-md mt-10">
+        <h1 class="text-2xl font-bold text-gray-800 mb-6">药物信息查询</h1>
+        <div class="flex mb-4">
+            <input type="text" id="drug-name" class="w-full p-3 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="请输入药物名称...">
+            <button id="search-btn" class="bg-blue-500 text-white px-6 py-3 rounded-r-lg hover:bg-blue-600 transition-colors">
+                <i class="fa fa-search"></i>
+            </button>
+        </div>
+        <div id="drug-info" class="mt-6">
+            <!-- 查询结果将显示在这里 -->
+        </div>
+    </div>
+
+    <script>
+        const searchBtn = document.getElementById('search-btn');
+        const drugNameInput = document.getElementById('drug-name');
+        const drugInfoDiv = document.getElementById('drug-info');
+
+        const API_KEY = 'sk-ef5d339bf70b4f4d8e0657db5ba02d22';
+        const API_URL = 'https://api.deepseek.com/chat/completions';
+
+        async function searchDrug() {
+            const drugName = drugNameInput.value.trim();
+            if (!drugName) {
+                drugInfoDiv.innerHTML = '<p class="text-red-500">请输入药物名称。</p>';
+                return;
+            }
+
+            drugInfoDiv.innerHTML = '<div class="flex items-center justify-center"><i class="fa fa-spinner fa-spin text-2xl text-blue-500"></i><p class="ml-2">正在查询，请稍候...</p></div>';
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${API_KEY}`
+                    },
+                    body: JSON.stringify({
+                        model: 'deepseek-chat',
+                        messages: [
+                            { content: `请详细介绍一下药物 \"${drugName}\"。请从以下几个方面进行说明：\n1.  **用途和适应症**：这种药主要用来治疗什么疾病？\n2.  **用法用量**：应该如何服用？剂量和频率是多少？\n3.  **常见副作用**：服用后可能会出现哪些常见的副作用？\n4.  **注意事项和禁忌**：哪些情况下不能服用？需要注意什么？\n5.  **与其他药物的相互作用**：它会和哪些其他药物发生反应？`, role: 'user' }
+                        ]
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP 错误！状态: ${response.status}`);
+                }
+
+                const data = await response.json();
+                const drugInfo = data.choices[0].message.content;
+
+                // 使用简单的格式化来显示信息
+                const formattedInfo = drugInfo.replace(/\n/g, '<br>');
+                drugInfoDiv.innerHTML = `<div class="prose max-w-none">${formattedInfo}</div>`;
+
+            } catch (error) {
+                console.error('查询药物信息时出错:', error);
+                drugInfoDiv.innerHTML = '<p class="text-red-500">查询失败，请检查您的网络连接或稍后再试。</p>';
+            }
+        }
+
+        searchBtn.addEventListener('click', searchDrug);
+        drugNameInput.addEventListener('keyup', (event) => {
+            if (event.key === 'Enter') {
+                searchDrug();
+            }
+        });
+    </script>
+</body>
+</html>

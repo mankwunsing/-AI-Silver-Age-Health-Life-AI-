@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>饮食建议功能修复测试</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">饮食建议功能修复测试</h1>
+        
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">修复内容</h2>
+            <div class="space-y-3">
+                <div class="flex items-center">
+                    <span class="w-3 h-3 bg-green-500 rounded-full mr-3"></span>
+                    <span>修复了AI服务认证失败的问题</span>
+                </div>
+                <div class="flex items-center">
+                    <span class="w-3 h-3 bg-green-500 rounded-full mr-3"></span>
+                    <span>增强了基于规则的备用建议功能</span>
+                </div>
+                <div class="flex items-center">
+                    <span class="w-3 h-3 bg-green-500 rounded-full mr-3"></span>
+                    <span>添加了健康检查机制</span>
+                </div>
+                <div class="flex items-center">
+                    <span class="w-3 h-3 bg-green-500 rounded-full mr-3"></span>
+                    <span>提供了更详细的个性化建议</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">测试功能</h2>
+            <div class="flex flex-wrap gap-4">
+                <button onclick="testWithCompleteData()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded flex items-center">
+                    <i class="fa fa-user mr-2"></i>测试完整数据
+                </button>
+                <button onclick="testWithMinimalData()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded flex items-center">
+                    <i class="fa fa-info mr-2"></i>测试最少数据
+                </button>
+                <button onclick="testWithHealthIssues()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded flex items-center">
+                    <i class="fa fa-heartbeat mr-2"></i>测试健康问题
+                </button>
+                <button onclick="testWithDietRecords()" class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded flex items-center">
+                    <i class="fa fa-cutlery mr-2"></i>测试饮食记录
+                </button>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">测试结果</h2>
+            <div id="test-results" class="space-y-4">
+                <div class="text-gray-500">点击上方按钮开始测试...</div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">功能特点</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-blue-50 p-4 rounded-lg">
+                    <h3 class="font-medium text-blue-800 mb-3">智能分析</h3>
+                    <ul class="text-sm text-blue-700 space-y-1">
+                        <li>• 营养需求分析</li>
+                        <li>• 体重管理建议</li>
+                        <li>• 血压管理建议</li>
+                        <li>• 血糖管理建议</li>
+                        <li>• 特殊疾病饮食建议</li>
+                    </ul>
+                </div>
+                
+                <div class="bg-green-50 p-4 rounded-lg">
+                    <h3 class="font-medium text-green-800 mb-3">个性化建议</h3>
+                    <ul class="text-sm text-green-700 space-y-1">
+                        <li>• 基于年龄和性别的营养需求</li>
+                        <li>• 基于健康指标的具体建议</li>
+                        <li>• 基于生活方式的活动建议</li>
+                        <li>• 基于饮食记录的改进建议</li>
+                        <li>• 营养补充和用餐时间建议</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 基于规则的备用饮食建议
+        function generateRuleBasedDietAdvice(healthData) {
+            let advice = "🤖 **智能营养分析** - 基于您的健康数据提供个性化饮食建议\n\n";
+            
+            // 营养需求分析
+            advice += "## 📊 营养需求分析\n\n";
+            
+            const age = parseInt(healthData.age);
+            const gender = healthData.gender;
+            const bmi = parseFloat(healthData.bmi);
+            
+            if (age && gender) {
+                if (age >= 60) {
+                    advice += `**老年营养需求** (${age}岁${gender === '男' ? '男性' : '女性'})：\n`;
+                    advice += "- 蛋白质需求：1.0-1.2g/kg体重/天\n";
+                    advice += "- 钙质需求：1000-1200mg/天\n";
+                    advice += "- 维生素D需求：800-1000IU/天\n";
+                    advice += "- 水分需求：1500-2000ml/天\n\n";
+                } else if (age >= 50) {
+                    advice += `**中年营养需求** (${age}岁${gender === '男' ? '男性' : '女性'})：\n`;
+                    advice += "- 蛋白质需求：0.8-1.0g/kg体重/天\n";
+                    advice += "- 钙质需求：1000mg/天\n";
+                    advice += "- 维生素D需求：600-800IU/天\n";
+                    advice += "- 水分需求：2000-2500ml/天\n\n";
+                }
+            }
+            
+            // BMI分析
+            if (bmi) {
+                advice += "## 🏃‍♂️ 体重管理建议\n\n";
+                if (bmi < 18.5) {
+                    advice += "**体重偏轻** (BMI: " + bmi.toFixed(1) + ")：\n";
+                    advice += "- 增加营养密度高的食物：坚果、全脂奶制品、瘦肉、鱼类\n";
+                    advice += "- 适当增加健康脂肪：橄榄油、牛油果、坚果\n";
+                    advice += "- 少食多餐，增加餐次\n";
+                    advice += "- 推荐食物：全脂牛奶、鸡蛋、瘦肉、坚果、香蕉\n\n";
+                } else if (bmi > 24) {
+                    advice += "**体重偏重** (BMI: " + bmi.toFixed(1) + ")：\n";
+                    advice += "- 控制总热量摄入，创造热量缺口\n";
+                    advice += "- 增加蔬菜和蛋白质比例，减少精制碳水化合物\n";
+                    advice += "- 选择低热量高纤维食物\n";
+                    advice += "- 推荐食物：绿叶蔬菜、瘦肉、鱼类、燕麦、豆类\n";
+                    advice += "- 避免食物：高糖饮料、油炸食品、精制米面\n\n";
+                } else {
+                    advice += "**体重正常** (BMI: " + bmi.toFixed(1) + ")：\n";
+                    advice += "- 保持均衡饮食，维持当前健康状态\n";
+                    advice += "- 继续多样化饮食，适量运动\n\n";
+                }
+            }
+            
+            // 血压分析
+            const systolic = parseInt(healthData.bloodPressure?.systolic);
+            const diastolic = parseInt(healthData.bloodPressure?.diastolic);
+            if (systolic && diastolic) {
+                advice += "## 🩺 血压管理建议\n\n";
+                if (systolic >= 140 || diastolic >= 90) {
+                    advice += "**血压偏高** (" + systolic + "/" + diastolic + " mmHg)：\n";
+                    advice += "- 减少钠盐摄入，每日不超过6克（约1茶匙）\n";
+                    advice += "- 增加富含钾的食物：香蕉、橙子、菠菜、土豆、番茄\n";
+                    advice += "- 增加富含镁的食物：坚果、绿叶蔬菜、全谷物\n";
+                    advice += "- 限制加工食品、腌制食品、快餐\n";
+                    advice += "- 推荐食物：香蕉、橙子、菠菜、燕麦、坚果\n";
+                    advice += "- 避免食物：咸菜、腊肉、方便面、薯片\n\n";
+                } else if (systolic >= 120 || diastolic >= 80) {
+                    advice += "**血压正常偏高** (" + systolic + "/" + diastolic + " mmHg)：\n";
+                    advice += "- 预防性控制钠盐摄入\n";
+                    advice += "- 增加富含钾的食物\n";
+                    advice += "- 保持健康生活方式\n\n";
+                } else {
+                    advice += "**血压正常** (" + systolic + "/" + diastolic + " mmHg)：\n";
+                    advice += "- 继续保持健康饮食和生活方式\n\n";
+                }
+            }
+            
+            // 血糖分析
+            const glucose = parseInt(healthData.bloodGlucose);
+            if (glucose) {
+                advice += "## 🍯 血糖管理建议\n\n";
+                if (glucose > 126) {
+                    advice += "**血糖偏高** (" + glucose + " mg/dL)：\n";
+                    advice += "- 控制碳水化合物摄入，选择低GI食物\n";
+                    advice += "- 增加膳食纤维：燕麦、豆类、蔬菜、全谷物\n";
+                    advice += "- 定时定量进餐，避免暴饮暴食\n";
+                    advice += "- 推荐食物：燕麦、豆类、绿叶蔬菜、坚果、鱼类\n";
+                    advice += "- 避免食物：白米饭、白面包、糖果、含糖饮料\n\n";
+                } else if (glucose > 100) {
+                    advice += "**血糖正常偏高** (" + glucose + " mg/dL)：\n";
+                    advice += "- 预防性控制精制碳水化合物\n";
+                    advice += "- 增加膳食纤维摄入\n";
+                    advice += "- 保持规律进餐\n\n";
+                } else {
+                    advice += "**血糖正常** (" + glucose + " mg/dL)：\n";
+                    advice += "- 继续保持均衡饮食\n\n";
+                }
+            }
+            
+            // 医疗史分析
+            if (healthData.medicalHistory) {
+                advice += "## 🏥 特殊疾病饮食建议\n\n";
+                const medicalHistory = healthData.medicalHistory.toLowerCase();
+                
+                if (medicalHistory.includes('高血压') || medicalHistory.includes('血压')) {
+                    advice += "**高血压饮食原则**：\n";
+                    advice += "- DASH饮食法：多蔬菜水果，少钠盐\n";
+                    advice += "- 增加钾、钙、镁的摄入\n";
+                    advice += "- 限制酒精摄入\n\n";
+                }
+                
+                if (medicalHistory.includes('糖尿病') || medicalHistory.includes('血糖')) {
+                    advice += "**糖尿病饮食原则**：\n";
+                    advice += "- 控制碳水化合物总量和分布\n";
+                    advice += "- 选择低GI食物\n";
+                    advice += "- 定时定量进餐\n";
+                    advice += "- 增加膳食纤维\n\n";
+                }
+            }
+            
+            // 饮食记录分析
+            if (healthData.dietRecords && healthData.dietRecords.length > 0) {
+                advice += "## 📝 基于您的饮食记录\n\n";
+                advice += "**近期饮食回顾**：\n";
+                const recentRecords = healthData.dietRecords.slice(-3);
+                recentRecords.forEach(record => {
+                    advice += `- ${record.mealTime}: ${record.foodContent}\n`;
+                });
+                advice += "\n**改进建议**：\n";
+                advice += "- 确保每餐都有蔬菜\n";
+                advice += "- 增加优质蛋白质来源\n";
+                advice += "- 控制精制碳水化合物\n\n";
+            }
+            
+            // 通用饮食原则
+            advice += "## 🥗 通用饮食原则\n\n";
+            advice += "**健康饮食金字塔**：\n";
+            advice += "1. **基础层**：全谷物、蔬菜、水果（占餐盘的50%）\n";
+            advice += "2. **蛋白质层**：瘦肉、鱼类、豆类、坚果（占餐盘的25%）\n";
+            advice += "3. **健康脂肪层**：橄榄油、坚果、牛油果（适量）\n";
+            advice += "4. **限制层**：精制糖、加工食品、过量盐分\n\n";
+            
+            advice += "**每日饮食目标**：\n";
+            advice += "- 蔬菜：300-500g\n";
+            advice += "- 水果：200-350g\n";
+            advice += "- 全谷物：250-400g\n";
+            advice += "- 蛋白质：60-80g\n";
+            advice += "- 水分：1500-2000ml\n\n";
+            
+            // 注意事项
+            advice += "## ⚠️ 重要注意事项\n\n";
+            advice += "- 以上建议仅供参考，不能替代专业医疗建议\n";
+            advice += "- 如有特殊疾病，请咨询专业医生或营养师\n";
+            advice += "- 饮食调整应循序渐进，避免突然改变\n";
+            advice += "- 定期监测健康指标，及时调整饮食方案\n";
+            advice += "- 结合适量运动，效果更佳\n\n";
+            
+            advice += "💡 **温馨提示**：健康饮食是一个长期的过程，坚持就是胜利！";
+            
+            return advice;
+        }
+
+        // 显示建议
+        function displayAdvice(advice, title) {
+            const resultsDiv = document.getElementById('test-results');
+            const formattedAdvice = advice.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            
+            resultsDiv.innerHTML = `
+                <div class="bg-blue-50 p-4 rounded-lg">
+                    <div class="flex items-start">
+                        <i class="fa fa-lightbulb-o text-blue-500 text-xl mr-3 mt-1"></i>
+                        <div class="flex-1">
+                            <h4 class="font-semibold text-blue-800 mb-2">${title}</h4>
+                            <div class="text-blue-700 text-sm leading-relaxed max-h-96 overflow-y-auto">
+                                ${formattedAdvice}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 测试完整数据
+        function testWithCompleteData() {
+            const healthData = {
+                age: '65',
+                gender: '男',
+                height: '170',
+                weight: '75',
+                bmi: '26.0',
+                bloodPressure: { systolic: '145', diastolic: '90' },
+                heartRate: '85',
+                bloodGlucose: '110',
+                temperature: '36.5',
+                spO2: '98',
+                medicalHistory: '高血压、糖尿病',
+                medications: '降压药、降糖药',
+                exerciseHabits: '每周散步3次',
+                sleepHabits: '每晚7小时',
+                stressLevel: '中等',
+                dietRecords: [
+                    { mealTime: '早餐', foodContent: '燕麦粥、鸡蛋、牛奶' },
+                    { mealTime: '午餐', foodContent: '糙米饭、清蒸鱼、青菜' },
+                    { mealTime: '晚餐', foodContent: '小米粥、蒸蛋、菠菜' }
+                ]
+            };
+            
+            const advice = generateRuleBasedDietAdvice(healthData);
+            displayAdvice(advice, '完整数据测试 - 个性化饮食建议');
+            updateResults('✅ 完整数据测试完成');
+        }
+
+        // 测试最少数据
+        function testWithMinimalData() {
+            const healthData = {
+                age: '30',
+                gender: '女',
+                bmi: '22.0'
+            };
+            
+            const advice = generateRuleBasedDietAdvice(healthData);
+            displayAdvice(advice, '最少数据测试 - 基础饮食建议');
+            updateResults('✅ 最少数据测试完成');
+        }
+
+        // 测试健康问题
+        function testWithHealthIssues() {
+            const healthData = {
+                age: '70',
+                gender: '男',
+                bmi: '28.5',
+                bloodPressure: { systolic: '160', diastolic: '95' },
+                bloodGlucose: '140',
+                medicalHistory: '高血压、糖尿病、心脏病',
+                medications: '多种药物'
+            };
+            
+            const advice = generateRuleBasedDietAdvice(healthData);
+            displayAdvice(advice, '健康问题测试 - 特殊饮食建议');
+            updateResults('✅ 健康问题测试完成');
+        }
+
+        // 测试饮食记录
+        function testWithDietRecords() {
+            const healthData = {
+                age: '55',
+                gender: '女',
+                bmi: '24.5',
+                dietRecords: [
+                    { mealTime: '早餐', foodContent: '白粥、咸菜、油条' },
+                    { mealTime: '午餐', foodContent: '白米饭、红烧肉、土豆丝' },
+                    { mealTime: '晚餐', foodContent: '面条、鸡蛋、青菜' },
+                    { mealTime: '加餐', foodContent: '蛋糕、奶茶' }
+                ]
+            };
+            
+            const advice = generateRuleBasedDietAdvice(healthData);
+            displayAdvice(advice, '饮食记录测试 - 改进建议');
+            updateResults('✅ 饮食记录测试完成');
+        }
+
+        // 更新测试结果
+        function updateResults(message) {
+            const resultsDiv = document.getElementById('test-results');
+            const timestamp = new Date().toLocaleTimeString();
+            const existingContent = resultsDiv.innerHTML;
+            
+            if (existingContent.includes('点击上方按钮开始测试')) {
+                resultsDiv.innerHTML = `<div class="text-green-600">[${timestamp}] ${message}</div>`;
+            } else {
+                resultsDiv.innerHTML = existingContent + `<div class="text-green-600">[${timestamp}] ${message}</div>`;
+            }
+        }
+
+        // 页面加载时显示欢迎信息
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('饮食建议功能修复测试页面已加载');
+        });
+    </script>
+</body>
+</html>

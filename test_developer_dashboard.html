@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>开发者后台系统测试</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">开发者后台系统测试</h1>
+        
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">功能概述</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-blue-50 p-4 rounded-lg">
+                    <h3 class="font-medium text-blue-800 mb-3">用户反馈系统</h3>
+                    <ul class="text-sm text-blue-700 space-y-1">
+                        <li>• 自动保存到本地存储</li>
+                        <li>• 邮件通知开发者</li>
+                        <li>• 分类管理（反馈/建议）</li>
+                        <li>• 状态跟踪（新/已处理）</li>
+                    </ul>
+                </div>
+                
+                <div class="bg-green-50 p-4 rounded-lg">
+                    <h3 class="font-medium text-green-800 mb-3">开发者后台</h3>
+                    <ul class="text-sm text-green-700 space-y-1">
+                        <li>• 查看所有反馈和建议</li>
+                        <li>• 标记处理状态</li>
+                        <li>• 导出数据</li>
+                        <li>• 删除管理</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">测试功能</h2>
+            <div class="flex flex-wrap gap-4">
+                <button onclick="addTestFeedback()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded flex items-center">
+                    <i class="fa fa-plus mr-2"></i>添加测试反馈
+                </button>
+                <button onclick="addTestSuggestion()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded flex items-center">
+                    <i class="fa fa-lightbulb-o mr-2"></i>添加测试建议
+                </button>
+                <button onclick="showDeveloperDashboard()" class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded flex items-center">
+                    <i class="fa fa-dashboard mr-2"></i>打开开发者后台
+                </button>
+                <button onclick="clearTestData()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded flex items-center">
+                    <i class="fa fa-trash mr-2"></i>清空测试数据
+                </button>
+            </div>
+        </div>
+
+        <div id="modal-container" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+            <div class="flex items-center justify-center min-h-screen p-4">
+                <div class="bg-white rounded-lg max-w-6xl w-full max-h-screen overflow-y-auto">
+                    <div class="flex justify-between items-center p-4 border-b">
+                        <h2 id="modal-title" class="text-xl font-semibold"></h2>
+                        <button onclick="closeModal()" class="text-gray-500 hover:text-gray-700">
+                            <i class="fa fa-times text-xl"></i>
+                        </button>
+                    </div>
+                    <div id="modal-content" class="p-0"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">邮件通知功能</h2>
+            <div class="bg-yellow-50 p-4 rounded-lg">
+                <h3 class="font-medium text-yellow-800 mb-2">邮件通知说明</h3>
+                <p class="text-sm text-yellow-700 mb-3">
+                    当用户提交反馈或建议时，系统会自动尝试打开邮件客户端，向开发者邮箱发送通知。
+                </p>
+                <div class="text-sm text-yellow-700">
+                    <p><strong>开发者邮箱:</strong> 20231079@tcss.edu.hk</p>
+                    <p><strong>邮件内容:</strong> 包含反馈类型、描述、联系方式、时间戳等完整信息</p>
+                    <p><strong>注意:</strong> 需要用户浏览器支持mailto协议，并且已配置邮件客户端</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 通用模态框显示函数
+        function showModal(title, content) {
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-content').innerHTML = content;
+            document.getElementById('modal-container').classList.remove('hidden');
+        }
+
+        // 关闭模态框
+        function closeModal() {
+            document.getElementById('modal-container').classList.add('hidden');
+        }
+
+        // 保存反馈到本地存储
+        function saveFeedbackToStorage(feedback) {
+            try {
+                let feedbacks = JSON.parse(localStorage.getItem('userFeedbacks') || '[]');
+                feedbacks.push(feedback);
+                localStorage.setItem('userFeedbacks', JSON.stringify(feedbacks));
+                console.log('反馈已保存到本地存储:', feedback);
+            } catch (error) {
+                console.error('保存反馈失败:', error);
+            }
+        }
+
+        // 发送邮件通知开发者
+        function sendEmailNotification(feedback) {
+            try {
+                const developerEmail = '20231079@tcss.edu.hk';
+                const subject = feedback.type === 'feedback' ? '新用户反馈' : '新功能建议';
+                const body = generateEmailBody(feedback);
+                
+                // 创建邮件链接
+                const mailtoLink = `mailto:${developerEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+                
+                // 尝试打开邮件客户端
+                window.open(mailtoLink, '_blank');
+                
+                console.log('邮件通知已发送:', { developerEmail, subject, body });
+            } catch (error) {
+                console.error('发送邮件通知失败:', error);
+            }
+        }
+
+        // 生成邮件内容
+        function generateEmailBody(feedback) {
+            const timestamp = new Date(feedback.timestamp).toLocaleString('zh-CN');
+            
+            if (feedback.type === 'feedback') {
+                return `
+新用户反馈 - ${timestamp}
+
+反馈类型: ${getFeedbackTypeText(feedback.feedbackType)}
+问题描述: ${feedback.description}
+联系方式: ${feedback.contact || '未提供'}
+
+请及时查看并处理此反馈。
+
+---
+银龄康伴 AI 系统自动通知
+                `.trim();
+            } else {
+                return `
+新功能建议 - ${timestamp}
+
+功能类别: ${getSuggestionCategoryText(feedback.category)}
+功能建议: ${feedback.description}
+使用场景: ${feedback.scenario || '未提供'}
+优先级: ${getPriorityText(feedback.priority)}
+联系方式: ${feedback.contact || '未提供'}
+
+请评估此建议并考虑在后续版本中实现。
+
+---
+银龄康伴 AI 系统自动通知
+                `.trim();
+            }
+        }
+
+        // 获取反馈类型文本
+        function getFeedbackTypeText(type) {
+            const types = {
+                'bug': 'Bug报告',
+                'improvement': '功能改进',
+                'usability': '使用体验',
+                'other': '其他'
+            };
+            return types[type] || type;
+        }
+
+        // 获取建议类别文本
+        function getSuggestionCategoryText(category) {
+            const categories = {
+                'health': '健康管理',
+                'ui': '界面优化',
+                'ai': 'AI功能',
+                'data': '数据处理',
+                'notification': '提醒功能',
+                'other': '其他'
+            };
+            return categories[category] || category;
+        }
+
+        // 获取优先级文本
+        function getPriorityText(priority) {
+            const priorities = {
+                'low': '低',
+                'medium': '中',
+                'high': '高'
+            };
+            return priorities[priority] || priority;
+        }
+
+        // 开发者后台 - 查看所有反馈和建议
+        function showDeveloperDashboard() {
+            const feedbacks = JSON.parse(localStorage.getItem('userFeedbacks') || '[]');
+            
+            const dashboardContent = `
+                <div class="max-w-6xl mx-auto p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800">开发者后台 - 用户反馈管理</h2>
+                        <div class="flex space-x-2">
+                            <button onclick="exportFeedbacks()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-sm">
+                                导出数据
+                            </button>
+                            <button onclick="clearAllFeedbacks()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded text-sm">
+                                清空数据
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <h3 class="font-medium text-blue-800">总反馈数</h3>
+                            <p class="text-2xl font-bold text-blue-600">${feedbacks.length}</p>
+                        </div>
+                        <div class="bg-green-50 p-4 rounded-lg">
+                            <h3 class="font-medium text-green-800">新反馈</h3>
+                            <p class="text-2xl font-bold text-green-600">${feedbacks.filter(f => f.status === 'new').length}</p>
+                        </div>
+                        <div class="bg-purple-50 p-4 rounded-lg">
+                            <h3 class="font-medium text-purple-800">功能建议</h3>
+                            <p class="text-2xl font-bold text-purple-600">${feedbacks.filter(f => f.type === 'suggestion').length}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg shadow-md">
+                        <div class="p-4 border-b">
+                            <h3 class="text-lg font-semibold">反馈列表</h3>
+                        </div>
+                        <div class="max-h-96 overflow-y-auto">
+                            ${feedbacks.length === 0 ? 
+                                '<div class="p-8 text-center text-gray-500">暂无反馈数据</div>' :
+                                feedbacks.map(feedback => `
+                                    <div class="p-4 border-b hover:bg-gray-50">
+                                        <div class="flex justify-between items-start">
+                                            <div class="flex-1">
+                                                <div class="flex items-center space-x-2 mb-2">
+                                                    <span class="px-2 py-1 text-xs rounded ${feedback.type === 'feedback' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}">
+                                                        ${feedback.type === 'feedback' ? '反馈' : '建议'}
+                                                    </span>
+                                                    <span class="px-2 py-1 text-xs rounded ${feedback.status === 'new' ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800'}">
+                                                        ${feedback.status === 'new' ? '新' : '已处理'}
+                                                    </span>
+                                                    ${feedback.type === 'suggestion' ? `<span class="px-2 py-1 text-xs rounded ${feedback.priority === 'high' ? 'bg-red-100 text-red-800' : feedback.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'}">${getPriorityText(feedback.priority)}</span>` : ''}
+                                                </div>
+                                                <h4 class="font-medium text-gray-800 mb-1">
+                                                    ${feedback.type === 'feedback' ? getFeedbackTypeText(feedback.feedbackType) : getSuggestionCategoryText(feedback.category)}
+                                                </h4>
+                                                <p class="text-sm text-gray-600 mb-2">${feedback.description.substring(0, 100)}${feedback.description.length > 100 ? '...' : ''}</p>
+                                                <div class="text-xs text-gray-500">
+                                                    ${new Date(feedback.timestamp).toLocaleString('zh-CN')}
+                                                    ${feedback.contact ? ` | 联系: ${feedback.contact}` : ''}
+                                                </div>
+                                            </div>
+                                            <div class="flex space-x-2 ml-4">
+                                                <button onclick="viewFeedbackDetail(${feedback.id})" class="text-blue-600 hover:text-blue-800 text-sm">
+                                                    查看详情
+                                                </button>
+                                                <button onclick="markAsProcessed(${feedback.id})" class="text-green-600 hover:text-green-800 text-sm">
+                                                    标记已处理
+                                                </button>
+                                                <button onclick="deleteFeedback(${feedback.id})" class="text-red-600 hover:text-red-800 text-sm">
+                                                    删除
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `).join('')
+                            }
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            showModal('开发者后台', dashboardContent);
+        }
+
+        // 查看反馈详情
+        function viewFeedbackDetail(feedbackId) {
+            const feedbacks = JSON.parse(localStorage.getItem('userFeedbacks') || '[]');
+            const feedback = feedbacks.find(f => f.id === feedbackId);
+            
+            if (!feedback) return;
+            
+            const detailContent = `
+                <div class="max-w-2xl mx-auto p-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">反馈详情</h2>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">类型</label>
+                            <p class="text-gray-900">${feedback.type === 'feedback' ? '用户反馈' : '功能建议'}</p>
+                        </div>
+                        
+                        ${feedback.type === 'feedback' ? `
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">反馈类型</label>
+                                <p class="text-gray-900">${getFeedbackTypeText(feedback.feedbackType)}</p>
+                            </div>
+                        ` : `
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">功能类别</label>
+                                <p class="text-gray-900">${getSuggestionCategoryText(feedback.category)}</p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">优先级</label>
+                                <p class="text-gray-900">${getPriorityText(feedback.priority)}</p>
+                            </div>
+                            ${feedback.scenario ? `
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">使用场景</label>
+                                    <p class="text-gray-900">${feedback.scenario}</p>
+                                </div>
+                            ` : ''}
+                        `}
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">${feedback.type === 'feedback' ? '问题描述' : '功能建议'}</label>
+                            <p class="text-gray-900 whitespace-pre-wrap">${feedback.description}</p>
+                        </div>
+                        
+                        ${feedback.contact ? `
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">联系方式</label>
+                                <p class="text-gray-900">${feedback.contact}</p>
+                            </div>
+                        ` : ''}
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">提交时间</label>
+                            <p class="text-gray-900">${new Date(feedback.timestamp).toLocaleString('zh-CN')}</p>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">状态</label>
+                            <p class="text-gray-900">${feedback.status === 'new' ? '新反馈' : '已处理'}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex space-x-4 mt-6">
+                        <button onclick="markAsProcessed(${feedback.id}); this.closest('.fixed').remove(); showDeveloperDashboard();" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">
+                            标记已处理
+                        </button>
+                        <button onclick="this.closest('.fixed').remove()" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded">
+                            关闭
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            showModal('反馈详情', detailContent);
+        }
+
+        // 标记为已处理
+        function markAsProcessed(feedbackId) {
+            const feedbacks = JSON.parse(localStorage.getItem('userFeedbacks') || '[]');
+            const feedback = feedbacks.find(f => f.id === feedbackId);
+            if (feedback) {
+                feedback.status = 'processed';
+                localStorage.setItem('userFeedbacks', JSON.stringify(feedbacks));
+                console.log('反馈已标记为已处理:', feedbackId);
+            }
+        }
+
+        // 删除反馈
+        function deleteFeedback(feedbackId) {
+            if (confirm('确定要删除这个反馈吗？')) {
+                const feedbacks = JSON.parse(localStorage.getItem('userFeedbacks') || '[]');
+                const filteredFeedbacks = feedbacks.filter(f => f.id !== feedbackId);
+                localStorage.setItem('userFeedbacks', JSON.stringify(filteredFeedbacks));
+                console.log('反馈已删除:', feedbackId);
+                showDeveloperDashboard(); // 刷新列表
+            }
+        }
+
+        // 导出反馈数据
+        function exportFeedbacks() {
+            const feedbacks = JSON.parse(localStorage.getItem('userFeedbacks') || '[]');
+            const dataStr = JSON.stringify(feedbacks, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `feedbacks_${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // 清空所有反馈
+        function clearAllFeedbacks() {
+            if (confirm('确定要清空所有反馈数据吗？此操作不可恢复！')) {
+                localStorage.removeItem('userFeedbacks');
+                console.log('所有反馈数据已清空');
+                showDeveloperDashboard(); // 刷新列表
+            }
+        }
+
+        // 添加测试反馈
+        function addTestFeedback() {
+            const testFeedback = {
+                id: Date.now(),
+                type: 'feedback',
+                feedbackType: 'bug',
+                description: '这是一个测试反馈，用于验证开发者后台功能。用户报告了一个界面显示问题，希望开发者能够及时修复。',
+                contact: 'test@example.com',
+                timestamp: new Date().toISOString(),
+                status: 'new'
+            };
+            
+            saveFeedbackToStorage(testFeedback);
+            sendEmailNotification(testFeedback);
+            alert('测试反馈已添加！');
+        }
+
+        // 添加测试建议
+        function addTestSuggestion() {
+            const testSuggestion = {
+                id: Date.now(),
+                type: 'suggestion',
+                category: 'ai',
+                description: '这是一个测试功能建议，希望添加语音识别功能，让用户可以通过语音输入健康数据。',
+                scenario: '老年用户可能不擅长打字，语音输入会更加方便和快捷。',
+                priority: 'high',
+                contact: 'suggestion@example.com',
+                timestamp: new Date().toISOString(),
+                status: 'new'
+            };
+            
+            saveFeedbackToStorage(testSuggestion);
+            sendEmailNotification(testSuggestion);
+            alert('测试建议已添加！');
+        }
+
+        // 清空测试数据
+        function clearTestData() {
+            if (confirm('确定要清空所有测试数据吗？')) {
+                localStorage.removeItem('userFeedbacks');
+                alert('测试数据已清空！');
+            }
+        }
+
+        // 页面加载时显示欢迎信息
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('开发者后台系统测试页面已加载');
+        });
+    </script>
+</body>
+</html>

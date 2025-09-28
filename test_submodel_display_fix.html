@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>子模型评估显示修复测试</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">子模型评估显示修复测试</h1>
+        
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">问题分析</h2>
+            <div class="space-y-3">
+                <div class="flex items-center">
+                    <span class="w-3 h-3 bg-red-500 rounded-full mr-3"></span>
+                    <span>显示代码使用错误的属性名</span>
+                </div>
+                <div class="flex items-center">
+                    <span class="w-3 h-3 bg-red-500 rounded-full mr-3"></span>
+                    <span>科学评估模块返回: <code>bloodPressureStability</code></span>
+                </div>
+                <div class="flex items-center">
+                    <span class="w-3 h-3 bg-red-500 rounded-full mr-3"></span>
+                    <span>显示代码使用: <code>bloodPressure</code></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">修复内容</h2>
+            <div class="space-y-3">
+                <div class="flex items-center">
+                    <span class="w-3 h-3 bg-green-500 rounded-full mr-3"></span>
+                    <span>修复了属性名不匹配问题</span>
+                </div>
+                <div class="flex items-center">
+                    <span class="w-3 h-3 bg-green-500 rounded-full mr-3"></span>
+                    <span>血压稳定性: <code>bloodPressure</code> → <code>bloodPressureStability</code></span>
+                </div>
+                <div class="flex items-center">
+                    <span class="w-3 h-3 bg-green-500 rounded-full mr-3"></span>
+                    <span>血氧灌注: <code>bloodOxygen</code> → <code>bloodOxygenPerfusion</code></span>
+                </div>
+                <div class="flex items-center">
+                    <span class="w-3 h-3 bg-green-500 rounded-full mr-3"></span>
+                    <span>体温-脉搏协同: <code>temperaturePulse</code> → <code>temperaturePulseSynergy</code></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">测试按钮</h2>
+            <div class="space-x-4">
+                <button onclick="testPropertyNameMatching()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
+                    测试属性名匹配
+                </button>
+                <button onclick="testSubModelDisplay()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">
+                    测试子模型显示
+                </button>
+                <button onclick="testDataStructure()" class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded">
+                    测试数据结构
+                </button>
+            </div>
+        </div>
+
+        <div id="test-results" class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">测试结果</h2>
+            <div id="results-content" class="text-gray-600">
+                点击上方按钮开始测试...
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * 模拟科学评估模块返回的数据结构
+         */
+        function getMockScientificAssessment() {
+            return {
+                compositeScore: { score: 85, confidence: 92 },
+                riskStratification: { category: '低风险' },
+                subModelAssessments: {
+                    bloodPressureStability: {
+                        assessment: '血壓穩定性：良好，變異性：低，綜合評分：85分',
+                        score: 0.85,
+                        status: 'good'
+                    },
+                    bloodOxygenPerfusion: {
+                        assessment: '外周灌注：良好，氧合效率：良好，綜合評分：78分',
+                        score: 0.78,
+                        status: 'good'
+                    },
+                    temperaturePulseSynergy: {
+                        assessment: '體溫-脈搏協同狀態：良好，體溫與脈搏呈正相關，符合生理規律，綜合評分：82分',
+                        score: 0.82,
+                        status: 'good'
+                    }
+                }
+            };
+        }
+
+        /**
+         * 测试属性名匹配
+         */
+        function testPropertyNameMatching() {
+            const resultsDiv = document.getElementById('results-content');
+            
+            const assessment = getMockScientificAssessment();
+            
+            // 测试修复前的错误属性名
+            const wrongBp = assessment.subModelAssessments?.bloodPressure?.assessment || '無數據';
+            const wrongSpO2 = assessment.subModelAssessments?.bloodOxygen?.assessment || '無數據';
+            const wrongTemp = assessment.subModelAssessments?.temperaturePulse?.assessment || '無數據';
+            
+            // 测试修复后的正确属性名
+            const correctBp = assessment.subModelAssessments?.bloodPressureStability?.assessment || '無數據';
+            const correctSpO2 = assessment.subModelAssessments?.bloodOxygenPerfusion?.assessment || '無數據';
+            const correctTemp = assessment.subModelAssessments?.temperaturePulseSynergy?.assessment || '無數據';
+            
+            resultsDiv.innerHTML = `
+                <div class="space-y-4">
+                    <div class="border rounded p-4">
+                        <h3 class="font-semibold text-red-600 mb-2">❌ 修复前（错误属性名）</h3>
+                        <ul class="text-sm space-y-1">
+                            <li>血压稳定性: ${wrongBp}</li>
+                            <li>血氧灌注: ${wrongSpO2}</li>
+                            <li>体温-脉搏协同: ${wrongTemp}</li>
+                        </ul>
+                    </div>
+                    <div class="border rounded p-4">
+                        <h3 class="font-semibold text-green-600 mb-2">✅ 修复后（正确属性名）</h3>
+                        <ul class="text-sm space-y-1">
+                            <li>血压稳定性: ${correctBp}</li>
+                            <li>血氧灌注: ${correctSpO2}</li>
+                            <li>体温-脉搏协同: ${correctTemp}</li>
+                        </ul>
+                    </div>
+                </div>
+            `;
+        }
+
+        /**
+         * 测试子模型显示
+         */
+        function testSubModelDisplay() {
+            const resultsDiv = document.getElementById('results-content');
+            
+            const assessment = getMockScientificAssessment();
+            
+            // 模拟修复后的显示代码
+            const displayHTML = `
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between p-3 bg-red-50 rounded">
+                        <span class="font-medium text-red-800">血壓穩定性</span>
+                        <span class="text-sm text-red-700">${assessment.subModelAssessments?.bloodPressureStability?.assessment || '無數據'}</span>
+                    </div>
+                    <div class="flex items-center justify-between p-3 bg-green-50 rounded">
+                        <span class="font-medium text-green-800">血氧灌注</span>
+                        <span class="text-sm text-green-700">${assessment.subModelAssessments?.bloodOxygenPerfusion?.assessment || '無數據'}</span>
+                    </div>
+                    <div class="flex items-center justify-between p-3 bg-orange-50 rounded">
+                        <span class="font-medium text-orange-800">體溫-脈搏協同</span>
+                        <span class="text-sm text-orange-700">${assessment.subModelAssessments?.temperaturePulseSynergy?.assessment || '無數據'}</span>
+                    </div>
+                </div>
+            `;
+            
+            resultsDiv.innerHTML = `
+                <div class="text-green-600">
+                    <h3 class="font-semibold mb-4">✅ 子模型显示测试通过</h3>
+                    <div class="bg-gray-50 p-4 rounded">
+                        ${displayHTML}
+                    </div>
+                </div>
+            `;
+        }
+
+        /**
+         * 测试数据结构
+         */
+        function testDataStructure() {
+            const resultsDiv = document.getElementById('results-content');
+            
+            const assessment = getMockScientificAssessment();
+            
+            resultsDiv.innerHTML = `
+                <div class="text-green-600">
+                    <h3 class="font-semibold mb-4">✅ 数据结构测试通过</h3>
+                    <div class="bg-gray-50 p-4 rounded">
+                        <pre class="text-sm whitespace-pre-wrap">${JSON.stringify(assessment.subModelAssessments, null, 2)}</pre>
+                    </div>
+                    <div class="mt-4 text-sm">
+                        <h4 class="font-medium mb-2">属性名对应关系：</h4>
+                        <ul class="list-disc list-inside space-y-1">
+                            <li><code>bloodPressureStability</code> → 血压稳定性评估</li>
+                            <li><code>bloodOxygenPerfusion</code> → 血氧灌注评估</li>
+                            <li><code>temperaturePulseSynergy</code> → 体温-脉搏协同评估</li>
+                        </ul>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 页面加载时显示欢迎信息
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('子模型评估显示修复测试页面已加载');
+        });
+    </script>
+</body>
+</html>

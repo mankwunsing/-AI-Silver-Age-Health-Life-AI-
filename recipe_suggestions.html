@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>健康食谱建议</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .prose h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-top: 1.5em;
+            margin-bottom: 0.5em;
+        }
+        .prose ul {
+            list-style-type: disc;
+            padding-left: 1.5em;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="max-w-lg mx-auto bg-white p-6 rounded-lg shadow-md mt-10">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-2xl font-bold text-gray-800">健康食谱建议</h1>
+            <a href="silver_age_health_life_ai.html" class="text-blue-500 hover:text-blue-600">
+                <i class="fa fa-arrow-left mr-2"></i>返回主页
+            </a>
+        </div>
+        <div id="recipe-info" class="mt-6">
+            <!-- 食谱建议将显示在这里 -->
+        </div>
+    </div>
+
+    <script>
+        const recipeInfoDiv = document.getElementById('recipe-info');
+        const API_KEY = 'sk-ef5d339bf70b4f4d8e0657db5ba02d22';
+        const API_URL = 'https://api.deepseek.com/chat/completions';
+
+        const conditionPrompts = {
+            high_blood_sugar: '为血糖偏高的人士提供一份一日三餐的健康食谱建议。请确保食谱低升糖指数（Low GI），并提供简单的烹饪方法。',
+            low_blood_sugar: '为血糖偏低的人士提供一份一日三餐的健康食谱建议。请推荐能够稳定血糖、防止低血糖发作的食物组合。',
+            high_blood_pressure: '为血压偏高的人士提供一份一日三餐的健康食谱建议。请确保食谱低钠、高钾，并有助于控制血压。',
+            low_blood_pressure: '为血压偏低的人士提供一份一日三餐的健康食谱建议。请推荐有助于提升和稳定血压的营养均衡食谱。',
+            high_cholesterol: '为胆固醇偏高的人士提供一份一日三餐的健康食谱建议。请侧重于低饱和脂肪、高纤维的食物。',
+            general_wellness: '为追求日常健康的人士提供一份营养均衡的一日三餐食谱建议，请包含丰富的蔬菜、水果和优质蛋白质。'
+        };
+
+        function getHealthCondition(latestHealthRecord) {
+            if (!latestHealthRecord) return 'general_wellness';
+
+            const { bloodSugar, bloodPressure, cholesterol } = latestHealthRecord;
+            
+            // 优先判断血糖，其次是血压，最后是胆固醇
+            if (bloodSugar) {
+                if (bloodSugar > 7.8) return 'high_blood_sugar';
+                if (bloodSugar < 3.9) return 'low_blood_sugar';
+            }
+            if (bloodPressure) {
+                const [systolic, diastolic] = bloodPressure.split('/').map(Number);
+                if (systolic > 140 || diastolic > 90) return 'high_blood_pressure';
+                if (systolic < 90 || diastolic < 60) return 'low_blood_pressure';
+            }
+            if (cholesterol) {
+                if (cholesterol > 5.2) return 'high_cholesterol';
+            }
+
+            return 'general_wellness';
+        }
+
+        async function generateRecipe(condition) {
+            let basePrompt = conditionPrompts[condition];
+
+            if (!basePrompt) {
+                recipeInfoDiv.innerHTML = '<p class="text-red-500">无法确定健康状况，无法生成建议。</p>';
+                return;
+            }
+
+            const appData = JSON.parse(localStorage.getItem('health_app_data'));
+            const latestHealthRecord = appData && appData.healthData.length > 0 ? appData.healthData[0] : null;
+            
+            let personalizedPrompt = basePrompt;
+            let loadingMessage = "正在为您生成食谱，请稍候...";
+
+            if (latestHealthRecord) {
+                let healthInfo = '我的最新健康数据是：';
+                if (latestHealthRecord.bloodSugar) {
+                    healthInfo += `血糖 ${latestHealthRecord.bloodSugar} mmol/L，`;
+                }
+                if (latestHealthRecord.bloodPressure) {
+                    healthInfo += `血压 ${latestHealthRecord.bloodPressure} mmHg，`;
+                }
+                if (latestHealthRecord.cholesterol) {
+                    healthInfo += `胆固醇 ${latestHealthRecord.cholesterol} mmol/L，`;
+                }
+                healthInfo = healthInfo.slice(0, -1);
+                healthInfo += '。';
+
+                personalizedPrompt = `${healthInfo} ${basePrompt} 请根据我的具体健康数据，提供更加个性化和精准的一日三餐建议。`;
+                loadingMessage = "正在为您生成个性化食谱，请稍候...";
+            }
+
+            recipeInfoDiv.innerHTML = `<div class="flex items-center justify-center"><i class="fa fa-spinner fa-spin text-2xl text-green-500"></i><p class="ml-2">${loadingMessage}</p></div>`;
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${API_KEY}`
+                    },
+                    body: JSON.stringify({
+                        model: 'deepseek-chat',
+                        messages: [
+                            { content: personalizedPrompt, role: 'user' }
+                        ]
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP 错误！状态: ${response.status}`);
+                }
+
+                const data = await response.json();
+                const recipeInfo = data.choices[0].message.content;
+
+                const formattedInfo = recipeInfo.replace(/\n/g, '<br>');
+                recipeInfoDiv.innerHTML = `<div class="prose max-w-none">${formattedInfo}</div>`;
+
+            } catch (error) {
+                console.error('生成食谱时出错:', error);
+                recipeInfoDiv.innerHTML = '<p class="text-red-500">生成失败，请检查您的网络连接或稍后再试。</p>';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const appData = JSON.parse(localStorage.getItem('health_app_data'));
+            const latestHealthRecord = appData && appData.healthData.length > 0 ? appData.healthData[0] : null;
+
+            if (!latestHealthRecord) {
+                recipeInfoDiv.innerHTML = `
+                    <div class="text-center text-gray-600">
+                        <p>没有找到您的健康数据。</p>
+                        <p class="mt-2">请先返回主页记录您的健康状况。</p>
+                        <a href="silver_age_health_life_ai.html" class="mt-4 inline-block bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600">返回主页</a>
+                    </div>
+                `;
+                return;
+            }
+
+            const condition = getHealthCondition(latestHealthRecord);
+            generateRecipe(condition);
+        });
+    </script>
+</body>
+</html>

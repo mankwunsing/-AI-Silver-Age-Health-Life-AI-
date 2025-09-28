@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>医疗史和生活方式数据测试</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">医疗史和生活方式数据测试</h1>
+        
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">测试表单</h2>
+            <form id="test-form" class="space-y-6">
+                <!-- 基本信息 -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">年龄</label>
+                        <input type="number" id="test-age" placeholder="请输入年龄" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">性别</label>
+                        <select id="test-gender" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">请选择性别</option>
+                            <option value="男">男</option>
+                            <option value="女">女</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- 医疗史 -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">医疗史</label>
+                    <div class="space-y-2">
+                        <label class="flex items-center">
+                            <input type="checkbox" id="test-history-diabetes" class="mr-2">
+                            <span class="text-sm">糖尿病</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" id="test-history-hypertension" class="mr-2">
+                            <span class="text-sm">高血压</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" id="test-history-heart" class="mr-2">
+                            <span class="text-sm">心脏病</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- 生活方式 -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">生活方式</label>
+                    <div class="space-y-2">
+                        <label class="flex items-center">
+                            <input type="checkbox" id="test-lifestyle-smoking" class="mr-2">
+                            <span class="text-sm">吸烟</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" id="test-lifestyle-exercise" class="mr-2">
+                            <span class="text-sm">规律运动</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="space-x-4">
+                    <button type="button" onclick="testDataCollection()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
+                        测试数据收集
+                    </button>
+                    <button type="button" onclick="testAIPrompt()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">
+                        测试AI提示词
+                    </button>
+                    <button type="button" onclick="fillSampleData()" class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded">
+                        填充示例数据
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div id="test-results" class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">测试结果</h2>
+            <div id="results-content" class="text-gray-600">
+                填写表单并点击测试按钮...
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * 模拟数据收集函数
+         */
+        function collectTestHealthData() {
+            return {
+                age: document.getElementById('test-age')?.value || null,
+                gender: document.getElementById('test-gender')?.value || null,
+                diabetes: document.getElementById('test-history-diabetes')?.checked || false,
+                hypertension: document.getElementById('test-history-hypertension')?.checked || false,
+                heartDisease: document.getElementById('test-history-heart')?.checked || false,
+                smoking: document.getElementById('test-lifestyle-smoking')?.checked || false,
+                exercise: document.getElementById('test-lifestyle-exercise')?.checked || false,
+                exerciseFrequency: null,
+                bloodPressure: { systolic: 120, diastolic: 80 },
+                bmi: 22.5,
+                glucose: 95
+            };
+        }
+
+        /**
+         * 测试数据收集
+         */
+        function testDataCollection() {
+            const resultsDiv = document.getElementById('results-content');
+            
+            try {
+                const healthData = collectTestHealthData();
+                
+                resultsDiv.innerHTML = `
+                    <div class="text-green-600">
+                        <h3 class="font-semibold mb-4">✅ 数据收集测试通过</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <h4 class="font-medium mb-2">基本信息</h4>
+                                <ul class="text-sm space-y-1">
+                                    <li>年龄: ${healthData.age || '未填写'}</li>
+                                    <li>性别: ${healthData.gender || '未选择'}</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="font-medium mb-2">医疗史</h4>
+                                <ul class="text-sm space-y-1">
+                                    <li>糖尿病: ${healthData.diabetes ? '是' : '否'}</li>
+                                    <li>高血压: ${healthData.hypertension ? '是' : '否'}</li>
+                                    <li>心脏病: ${healthData.heartDisease ? '是' : '否'}</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="font-medium mb-2">生活方式</h4>
+                                <ul class="text-sm space-y-1">
+                                    <li>吸烟: ${healthData.smoking ? '是' : '否'}</li>
+                                    <li>规律运动: ${healthData.exercise ? '是' : '否'}</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="font-medium mb-2">健康指标</h4>
+                                <ul class="text-sm space-y-1">
+                                    <li>血压: ${healthData.bloodPressure.systolic}/${healthData.bloodPressure.diastolic} mmHg</li>
+                                    <li>BMI: ${healthData.bmi}</li>
+                                    <li>血糖: ${healthData.glucose} mg/dL</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } catch (error) {
+                resultsDiv.innerHTML = `
+                    <div class="text-red-600">
+                        <h3 class="font-semibold mb-2">❌ 数据收集测试失败</h3>
+                        <p>错误: ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        /**
+         * 测试AI提示词构建
+         */
+        function testAIPrompt() {
+            const resultsDiv = document.getElementById('results-content');
+            
+            try {
+                const healthData = collectTestHealthData();
+                
+                // 构建AI提示词
+                const userPrompt = `请基于以下健康数据生成专业健康报告：
+
+用户基本信息：
+- 年龄: ${healthData.age || '未提供'}
+- 性别: ${healthData.gender || '未提供'}
+
+基础健康指标：
+- 血压: ${healthData.bloodPressure.systolic}/${healthData.bloodPressure.diastolic} mmHg
+- BMI: ${healthData.bmi}
+- 血糖: ${healthData.glucose} mg/dL
+
+医疗史：
+- 糖尿病: ${healthData.diabetes ? '是' : '否'}
+- 高血压: ${healthData.hypertension ? '是' : '否'}
+- 心脏病: ${healthData.heartDisease ? '是' : '否'}
+
+生活方式：
+- 吸烟: ${healthData.smoking ? '是' : '否'}
+- 规律运动: ${healthData.exercise ? '是' : '否'}
+- 运动频率: ${healthData.exerciseFrequency || '未提供'}
+
+请基于以上数据生成一份详细的健康分析报告。`;
+
+                resultsDiv.innerHTML = `
+                    <div class="text-green-600">
+                        <h3 class="font-semibold mb-4">✅ AI提示词测试通过</h3>
+                        <div class="bg-gray-50 p-4 rounded">
+                            <pre class="text-sm whitespace-pre-wrap">${userPrompt}</pre>
+                        </div>
+                    </div>
+                `;
+            } catch (error) {
+                resultsDiv.innerHTML = `
+                    <div class="text-red-600">
+                        <h3 class="font-semibold mb-2">❌ AI提示词测试失败</h3>
+                        <p>错误: ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        /**
+         * 填充示例数据
+         */
+        function fillSampleData() {
+            document.getElementById('test-age').value = '65';
+            document.getElementById('test-gender').value = '男';
+            document.getElementById('test-history-hypertension').checked = true;
+            document.getElementById('test-lifestyle-smoking').checked = true;
+            
+            const resultsDiv = document.getElementById('results-content');
+            resultsDiv.innerHTML = `
+                <div class="text-blue-600">
+                    <h3 class="font-semibold mb-2">📝 示例数据已填充</h3>
+                    <p>已填充：65岁男性，有高血压史，吸烟</p>
+                    <p class="text-sm mt-2">现在可以点击"测试数据收集"或"测试AI提示词"来验证功能</p>
+                </div>
+            `;
+        }
+
+        // 页面加载时显示欢迎信息
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('医疗史和生活方式数据测试页面已加载');
+        });
+    </script>
+</body>
+</html>

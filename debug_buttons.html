@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>按鈕調試</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">按鈕調試測試</h1>
+        
+        <div class="bg-white rounded-xl shadow-lg p-6">
+            <h2 class="text-xl font-semibold mb-4">測試按鈕功能</h2>
+            
+            <div class="space-y-4">
+                <button onclick="testButton1()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                    測試按鈕 1
+                </button>
+                
+                <button onclick="testButton2()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                    測試按鈕 2
+                </button>
+                
+                <button onclick="handleAction('testAction')" class="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600">
+                    測試 handleAction
+                </button>
+                
+                <button onclick="testDeviceData()" class="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600">
+                    測試設備數據
+                </button>
+            </div>
+            
+            <div id="debug-output" class="mt-6 p-4 bg-gray-50 rounded text-sm font-mono">
+                <p class="text-gray-500">點擊按鈕查看輸出...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 測試函數 1
+        function testButton1() {
+            console.log('測試按鈕 1 被點擊');
+            document.getElementById('debug-output').innerHTML = '<div class="text-green-600">✅ 測試按鈕 1 正常工作</div>';
+        }
+
+        // 測試函數 2
+        function testButton2() {
+            console.log('測試按鈕 2 被點擊');
+            document.getElementById('debug-output').innerHTML = '<div class="text-green-600">✅ 測試按鈕 2 正常工作</div>';
+        }
+
+        // 測試 handleAction 函數
+        async function handleAction(action, ...args) {
+            console.log('handleAction 被調用:', action, args);
+            
+            switch(action) {
+                case 'testAction':
+                    document.getElementById('debug-output').innerHTML = '<div class="text-green-600">✅ handleAction 正常工作</div>';
+                    break;
+                default:
+                    document.getElementById('debug-output').innerHTML = '<div class="text-yellow-600">⚠️ 未知操作: ' + action + '</div>';
+            }
+        }
+
+        // 測試設備數據函數
+        function testDeviceData() {
+            try {
+                console.log('測試設備數據函數');
+                
+                // 模擬設備數據
+                const deviceData = {
+                    id: Date.now(),
+                    type: '血压',
+                    device: '血压计',
+                    time: new Date().toISOString().slice(0, 16),
+                    notes: '測試數據',
+                    timestamp: new Date().toISOString(),
+                    data: {
+                        systolic: 120,
+                        diastolic: 80,
+                        pulse: 72,
+                        assessment: {
+                            level: '正常',
+                            advice: '血壓正常'
+                        }
+                    }
+                };
+                
+                // 保存到本地存儲
+                const healthRecords = JSON.parse(localStorage.getItem('healthRecords') || '[]');
+                healthRecords.push(deviceData);
+                localStorage.setItem('healthRecords', JSON.stringify(healthRecords));
+                
+                document.getElementById('debug-output').innerHTML = '<div class="text-green-600">✅ 設備數據保存成功！</div>';
+                
+            } catch (error) {
+                console.error('設備數據測試失敗:', error);
+                document.getElementById('debug-output').innerHTML = '<div class="text-red-600">❌ 設備數據測試失敗: ' + error.message + '</div>';
+            }
+        }
+
+        // 頁面加載完成
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('頁面加載完成');
+            document.getElementById('debug-output').innerHTML = '<div class="text-blue-600">ℹ️ 頁面加載完成，可以開始測試</div>';
+        });
+    </script>
+</body>
+</html>

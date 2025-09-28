@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>實時圖表分析測試</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <style>
+        .input-field {
+            @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+        }
+        .card {
+            @apply bg-white rounded-xl shadow-lg p-6;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">實時圖表分析測試</h1>
+        
+        <!-- 功能說明 -->
+        <div class="card mb-6">
+            <h2 class="text-xl font-semibold mb-4">新功能說明</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-green-50 p-4 rounded-lg">
+                    <h3 class="font-semibold text-green-800">✅ 真實數據</h3>
+                    <p class="text-sm text-green-700 mt-2">圖表現在基於您錄入的真實健康數據</p>
+                </div>
+                <div class="bg-blue-50 p-4 rounded-lg">
+                    <h3 class="font-semibold text-blue-800">⏰ 時間範圍</h3>
+                    <p class="text-sm text-blue-700 mt-2">可選擇一日、一星期、一個月、一年</p>
+                </div>
+                <div class="bg-purple-50 p-4 rounded-lg">
+                    <h3 class="font-semibold text-purple-800">🔄 實時更新</h3>
+                    <p class="text-sm text-purple-700 mt-2">保存數據後圖表自動更新</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 數據錄入 -->
+        <div class="card mb-6">
+            <h2 class="text-xl font-semibold mb-4">快速數據錄入</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">收縮壓 (mmHg)</label>
+                    <input type="number" id="bp-systolic" placeholder="120" class="input-field" min="60" max="250">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">舒張壓 (mmHg)</label>
+                    <input type="number" id="bp-diastolic" placeholder="80" class="input-field" min="40" max="150">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">脈搏 (bpm)</label>
+                    <input type="number" id="bp-pulse" placeholder="72" class="input-field" min="30" max="200">
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">血氧飽和度 (%)</label>
+                    <input type="number" id="spo2-percent" placeholder="98" class="input-field" min="70" max="100" step="0.1">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">灌注指數 (%)</label>
+                    <input type="number" id="spo2-pi" placeholder="2.5" class="input-field" min="0.1" max="20" step="0.1">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">體溫 (°C)</label>
+                    <input type="number" id="temp-value" placeholder="36.5" class="input-field" min="30" max="45" step="0.1">
+                </div>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-base mb-2">測量時間</label>
+                    <input type="datetime-local" id="device-time" class="input-field">
+                </div>
+                <div>
+                    <label class="block text-base mb-2">備註</label>
+                    <textarea id="device-notes" placeholder="例如：餐後測量、運動後測量等" class="input-field" rows="3"></textarea>
+                </div>
+                <button onclick="saveAllData()" class="w-full py-4 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl text-lg font-bold hover:from-green-600 hover:to-green-700 transition-all duration-300 shadow-xl border-2 border-green-400 transform hover:scale-105">
+                    <i class="fa fa-save mr-2 text-xl"></i> 💾 保存所有數據並更新圖表
+                </button>
+            </div>
+        </div>
+
+        <!-- 圖表區域 -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <!-- 趨勢分析圖表 -->
+            <div class="card">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold">血壓趨勢分析</h3>
+                    <div class="flex items-center space-x-2">
+                        <select id="trend-time-range" class="text-sm border border-gray-300 rounded px-2 py-1" onchange="updateTrendChart()">
+                            <option value="1day">一日</option>
+                            <option value="1week" selected>一星期</option>
+                            <option value="1month">一個月</option>
+                            <option value="1year">一年</option>
+                        </select>
+                        <button onclick="updateTrendChart()" class="text-blue-500 text-sm hover:underline">
+                            <i class="fa fa-refresh mr-1"></i> 更新
+                        </button>
+                    </div>
+                </div>
+                <canvas id="trend-chart" height="300"></canvas>
+            </div>
+
+            <!-- 相關性分析圖表 -->
+            <div class="card">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold">健康指標分析</h3>
+                    <div class="flex items-center space-x-2">
+                        <select id="correlation-time-range" class="text-sm border border-gray-300 rounded px-2 py-1" onchange="updateCorrelationChart()">
+                            <option value="1day">一日</option>
+                            <option value="1week" selected>一星期</option>
+                            <option value="1month">一個月</option>
+                            <option value="1year">一年</option>
+                        </select>
+                        <button onclick="updateCorrelationChart()" class="text-blue-500 text-sm hover:underline">
+                            <i class="fa fa-refresh mr-1"></i> 更新
+                        </button>
+                    </div>
+                </div>
+                <canvas id="correlation-chart" height="300"></canvas>
+            </div>
+        </div>
+
+        <!-- 多維度圖表 -->
+        <div class="card mb-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold">多維度健康指標對比</h3>
+                <div class="flex items-center space-x-2">
+                    <select id="multi-dimension-time-range" class="text-sm border border-gray-300 rounded px-2 py-1" onchange="updateMultiDimensionChart()">
+                        <option value="1day">一日</option>
+                        <option value="1week" selected>一星期</option>
+                        <option value="1month">一個月</option>
+                        <option value="1year">一年</option>
+                    </select>
+                    <button onclick="updateMultiDimensionChart()" class="text-blue-500 text-sm hover:underline">
+                        <i class="fa fa-refresh mr-1"></i> 更新
+                    </button>
+                </div>
+            </div>
+            <canvas id="multi-dimension-chart" height="400"></canvas>
+        </div>
+
+        <!-- 測試結果 -->
+        <div class="card">
+            <h2 class="text-xl font-semibold mb-4">測試結果</h2>
+            <div id="test-results" class="bg-gray-50 p-4 rounded text-sm font-mono">
+                <p class="text-gray-500">請錄入數據並觀察圖表的實時更新...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 圖表實例存儲
+        window.chartInstances = {};
+
+        // 獲取指定時間範圍的數據
+        function getDataByTimeRange(timeRange) {
+            try {
+                const healthRecords = JSON.parse(localStorage.getItem('healthRecords') || '[]');
+                const now = new Date();
+                let startDate;
+                
+                switch (timeRange) {
+                    case '1day':
+                        startDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+                        break;
+                    case '1week':
+                        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                        break;
+                    case '1month':
+                        startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+                        break;
+                    case '1year':
+                        startDate = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+                        break;
+                    default:
+                        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                }
+                
+                return healthRecords.filter(record => {
+                    const recordDate = new Date(record.timestamp);
+                    return recordDate >= startDate && recordDate <= now;
+                });
+            } catch (error) {
+                console.error('獲取數據失敗:', error);
+                return [];
+            }
+        }
+
+        // 獲取時間範圍文字
+        function getTimeRangeText(timeRange) {
+            const texts = {
+                '1day': '一日',
+                '1week': '一星期',
+                '1month': '一個月',
+                '1year': '一年'
+            };
+            return texts[timeRange] || '一星期';
+        }
+
+        // 處理血壓趨勢數據
+        function processBloodPressureTrendData(records, timeRange) {
+            const bpRecords = records.filter(record => record.type === '血压' || record.type === '血壓');
+            
+            if (bpRecords.length === 0) {
+                return {
+                    labels: ['無數據'],
+                    datasets: [{
+                        label: '收縮壓',
+                        data: [0],
+                        borderColor: '#e74c3c',
+                        backgroundColor: '#e74c3c20',
+                        tension: 0.4
+                    }, {
+                        label: '舒張壓',
+                        data: [0],
+                        borderColor: '#3498db',
+                        backgroundColor: '#3498db20',
+                        tension: 0.4
+                    }]
+                };
+            }
+            
+            // 按時間排序
+            bpRecords.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+            
+            const labels = [];
+            const systolicData = [];
+            const diastolicData = [];
+            
+            bpRecords.forEach(record => {
+                const date = new Date(record.timestamp);
+                let label;
+                
+                switch (timeRange) {
+                    case '1day':
+                        label = date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+                        break;
+                    case '1week':
+                        label = date.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' });
+                        break;
+                    case '1month':
+                        label = date.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' });
+                        break;
+                    case '1year':
+                        label = date.toLocaleDateString('zh-CN', { month: 'short' });
+                        break;
+                    default:
+                        label = date.toLocaleDateString('zh-CN');
+                }
+                
+                labels.push(label);
+                systolicData.push(record.data.systolic);
+                diastolicData.push(record.data.diastolic);
+            });
+            
+            return {
+                labels: labels,
+                datasets: [{
+                    label: '收縮壓',
+                    data: systolicData,
+                    borderColor: '#e74c3c',
+                    backgroundColor: '#e74c3c20',
+                    tension: 0.4,
+                    pointRadius: 4,
+                    pointHoverRadius: 6
+                }, {
+                    label: '舒張壓',
+                    data: diastolicData,
+                    borderColor: '#3498db',
+                    backgroundColor: '#3498db20',
+                    tension: 0.4,
+                    pointRadius: 4,
+                    pointHoverRadius: 6
+                }]
+            };
+        }
+
+        // 處理相關性數據
+        function processCorrelationData(records) {
+            const bpRecords = records.filter(record => record.type === '血压' || record.type === '血壓');
+            const spo2Records = records.filter(record => record.type === '血氧');
+            const tempRecords = records.filter(record => record.type === '体温' || record.type === '體溫');
+            
+            if (bpRecords.length === 0) {
+                return {
+                    labels: ['無數據'],
+                    datasets: [{
+                        label: '數據可用性',
+                        data: [0],
+                        backgroundColor: ['#e74c3c'],
+                        borderColor: ['#c0392b'],
+                        borderWidth: 1
+                    }]
+                };
+            }
+            
+            // 計算數據可用性
+            const totalRecords = records.length;
+            const bpAvailability = bpRecords.length / Math.max(totalRecords, 1);
+            const spo2Availability = spo2Records.length / Math.max(totalRecords, 1);
+            const tempAvailability = tempRecords.length / Math.max(totalRecords, 1);
+            
+            // 計算血壓變異性
+            let bpVariability = 0;
+            if (bpRecords.length > 1) {
+                const systolicValues = bpRecords.map(r => r.data.systolic);
+                const mean = systolicValues.reduce((a, b) => a + b, 0) / systolicValues.length;
+                const variance = systolicValues.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / systolicValues.length;
+                bpVariability = Math.sqrt(variance) / mean;
+            }
+            
+            return {
+                labels: ['血壓數據', '血氧數據', '體溫數據', '數據完整性', '血壓穩定性'],
+                datasets: [{
+                    label: '健康指標分析',
+                    data: [
+                        bpAvailability,
+                        spo2Availability,
+                        tempAvailability,
+                        (bpAvailability + spo2Availability + tempAvailability) / 3,
+                        Math.max(0, 1 - bpVariability)
+                    ],
+                    backgroundColor: ['#e74c3c', '#2ecc71', '#f39c12', '#3498db', '#9b59b6'],
+                    borderColor: ['#c0392b', '#27ae60', '#e67e22', '#2980b9', '#8e44ad'],
+                    borderWidth: 1
+                }]
+            };
+        }
+
+        // 處理多維度數據
+        function processMultiDimensionData(records) {
+            const bpRecords = records.filter(record => record.type === '血压' || record.type === '血壓');
+            const spo2Records = records.filter(record => record.type === '血氧');
+            const tempRecords = records.filter(record => record.type === '体温' || record.type === '體溫');
+            
+            // 計算各項健康指標
+            let cardiovascularHealth = 50; // 心血管健康
+            let metabolicHealth = 50; // 代謝健康
+            let respiratoryHealth = 50; // 呼吸健康
+            let temperatureStability = 50; // 體溫穩定性
+            let dataCompleteness = 50; // 數據完整性
+            
+            if (bpRecords.length > 0) {
+                const latestBP = bpRecords[bpRecords.length - 1];
+                const systolic = latestBP.data.systolic;
+                const diastolic = latestBP.data.diastolic;
+                
+                // 心血管健康評分
+                if (systolic < 120 && diastolic < 80) cardiovascularHealth = 90;
+                else if (systolic < 130 && diastolic < 85) cardiovascularHealth = 80;
+                else if (systolic < 140 && diastolic < 90) cardiovascularHealth = 70;
+                else if (systolic < 160 && diastolic < 100) cardiovascularHealth = 50;
+                else cardiovascularHealth = 30;
+            }
+            
+            if (spo2Records.length > 0) {
+                const latestSpO2 = spo2Records[spo2Records.length - 1];
+                const percent = latestSpO2.data.percent;
+                
+                // 呼吸健康評分
+                if (percent >= 98) respiratoryHealth = 90;
+                else if (percent >= 95) respiratoryHealth = 80;
+                else if (percent >= 90) respiratoryHealth = 60;
+                else respiratoryHealth = 30;
+            }
+            
+            if (tempRecords.length > 0) {
+                const latestTemp = tempRecords[tempRecords.length - 1];
+                const temp = latestTemp.data.value;
+                
+                // 體溫穩定性評分
+                if (temp >= 36.0 && temp <= 37.2) temperatureStability = 90;
+                else if (temp >= 35.5 && temp <= 37.5) temperatureStability = 70;
+                else if (temp >= 35.0 && temp <= 38.0) temperatureStability = 50;
+                else temperatureStability = 30;
+            }
+            
+            // 數據完整性評分
+            const totalPossibleRecords = 3; // 血壓、血氧、體溫
+            const actualRecords = (bpRecords.length > 0 ? 1 : 0) + 
+                                 (spo2Records.length > 0 ? 1 : 0) + 
+                                 (tempRecords.length > 0 ? 1 : 0);
+            dataCompleteness = (actualRecords / totalPossibleRecords) * 100;
+            
+            // 代謝健康基於血壓和體溫綜合評估
+            metabolicHealth = (cardiovascularHealth + temperatureStability) / 2;
+            
+            return {
+                labels: ['心血管健康', '代謝健康', '呼吸健康', '體溫穩定性', '數據完整性'],
+                datasets: [{
+                    label: '當前狀態',
+                    data: [cardiovascularHealth, metabolicHealth, respiratoryHealth, temperatureStability, dataCompleteness],
+                    borderColor: '#3498db',
+                    backgroundColor: '#3498db40',
+                    pointBackgroundColor: '#3498db',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: '#3498db'
+                }, {
+                    label: '目標狀態',
+                    data: [85, 85, 85, 85, 100],
+                    borderColor: '#e74c3c',
+                    backgroundColor: '#e74c3c20',
+                    pointBackgroundColor: '#e74c3c',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: '#e74c3c'
+                }]
+            };
+        }
+
+        // 更新趨勢圖表
+        function updateTrendChart() {
+            const ctx = document.getElementById('trend-chart');
+            if (!ctx) return;
+
+            // 銷毀現有圖表
+            if (window.chartInstances && window.chartInstances['trend-chart']) {
+                window.chartInstances['trend-chart'].destroy();
+            }
+
+            // 獲取時間範圍
+            const timeRange = document.getElementById('trend-time-range')?.value || '1week';
+            
+            // 獲取真實數據
+            const records = getDataByTimeRange(timeRange);
+            const chartData = processBloodPressureTrendData(records, timeRange);
+            
+            window.chartInstances = window.chartInstances || {};
+            window.chartInstances['trend-chart'] = new Chart(ctx, {
+                type: 'line',
+                data: chartData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: `血壓趨勢分析 (${getTimeRangeText(timeRange)})`
+                        },
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: 60,
+                            max: 200,
+                            title: {
+                                display: true,
+                                text: '血壓 (mmHg)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 更新相關性圖表
+        function updateCorrelationChart() {
+            const ctx = document.getElementById('correlation-chart');
+            if (!ctx) return;
+
+            // 銷毀現有圖表
+            if (window.chartInstances && window.chartInstances['correlation-chart']) {
+                window.chartInstances['correlation-chart'].destroy();
+            }
+
+            // 獲取時間範圍
+            const timeRange = document.getElementById('correlation-time-range')?.value || '1week';
+            
+            // 獲取真實數據
+            const records = getDataByTimeRange(timeRange);
+            const chartData = processCorrelationData(records);
+            
+            window.chartInstances = window.chartInstances || {};
+            window.chartInstances['correlation-chart'] = new Chart(ctx, {
+                type: 'bar',
+                data: chartData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: `健康指標分析 (${getTimeRangeText(timeRange)})`
+                        },
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 1,
+                            title: {
+                                display: true,
+                                text: '指標強度'
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return (value * 100).toFixed(0) + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 更新多維度圖表
+        function updateMultiDimensionChart() {
+            const ctx = document.getElementById('multi-dimension-chart');
+            if (!ctx) return;
+
+            // 銷毀現有圖表
+            if (window.chartInstances && window.chartInstances['multi-dimension-chart']) {
+                window.chartInstances['multi-dimension-chart'].destroy();
+            }
+
+            // 獲取時間範圍
+            const timeRange = document.getElementById('multi-dimension-time-range')?.value || '1week';
+            
+            // 獲取真實數據
+            const records = getDataByTimeRange(timeRange);
+            const chartData = processMultiDimensionData(records);
+            
+            window.chartInstances = window.chartInstances || {};
+            window.chartInstances['multi-dimension-chart'] = new Chart(ctx, {
+                type: 'radar',
+                data: chartData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: `多維度健康指標對比 (${getTimeRangeText(timeRange)})`
+                        },
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                stepSize: 20,
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 更新所有圖表
+        function updateAllCharts() {
+            try {
+                updateTrendChart();
+                updateCorrelationChart();
+                updateMultiDimensionChart();
+            } catch (error) {
+                console.error('更新圖表失敗:', error);
+            }
+        }
+
+        // 保存所有數據
+        function saveAllData() {
+            const systolic = parseInt(document.getElementById('bp-systolic').value);
+            const diastolic = parseInt(document.getElementById('bp-diastolic').value);
+            const pulse = parseInt(document.getElementById('bp-pulse').value);
+            const spo2Percent = parseFloat(document.getElementById('spo2-percent').value);
+            const spo2Pi = parseFloat(document.getElementById('spo2-pi').value);
+            const tempValue = parseFloat(document.getElementById('temp-value').value);
+            const time = document.getElementById('device-time').value || new Date().toISOString().slice(0, 16);
+            const notes = document.getElementById('device-notes').value;
+            
+            if (!systolic || !diastolic || !pulse) {
+                document.getElementById('test-results').innerHTML = '<div class="text-red-600">❌ 請填寫完整的血壓數據</div>';
+                return;
+            }
+            
+            try {
+                const healthRecords = JSON.parse(localStorage.getItem('healthRecords') || '[]');
+                
+                // 保存血壓數據
+                const bpData = {
+                    id: Date.now(),
+                    type: '血压',
+                    device: '血压计',
+                    time: time,
+                    notes: notes,
+                    timestamp: new Date().toISOString(),
+                    data: {
+                        systolic: systolic,
+                        diastolic: diastolic,
+                        pulse: pulse,
+                        assessment: assessBloodPressure(systolic, diastolic)
+                    }
+                };
+                healthRecords.push(bpData);
+                
+                // 保存血氧數據（如果有）
+                if (spo2Percent) {
+                    const spo2Data = {
+                        id: Date.now() + 1,
+                        type: '血氧',
+                        device: '血氧计',
+                        time: time,
+                        notes: notes,
+                        timestamp: new Date().toISOString(),
+                        data: {
+                            percent: spo2Percent,
+                            pi: spo2Pi || 2.0,
+                            pr: pulse,
+                            assessment: assessSpO2(spo2Percent)
+                        }
+                    };
+                    healthRecords.push(spo2Data);
+                }
+                
+                // 保存體溫數據（如果有）
+                if (tempValue) {
+                    const tempData = {
+                        id: Date.now() + 2,
+                        type: '体温',
+                        device: '体温计',
+                        time: time,
+                        notes: notes,
+                        timestamp: new Date().toISOString(),
+                        data: {
+                            value: tempValue,
+                            location: '腋下',
+                            assessment: assessTemperature(tempValue)
+                        }
+                    };
+                    healthRecords.push(tempData);
+                }
+                
+                localStorage.setItem('healthRecords', JSON.stringify(healthRecords));
+                
+                // 清空表單
+                document.getElementById('bp-systolic').value = '';
+                document.getElementById('bp-diastolic').value = '';
+                document.getElementById('bp-pulse').value = '';
+                document.getElementById('spo2-percent').value = '';
+                document.getElementById('spo2-pi').value = '';
+                document.getElementById('temp-value').value = '';
+                document.getElementById('device-time').value = '';
+                document.getElementById('device-notes').value = '';
+                
+                // 實時更新圖表
+                updateAllCharts();
+                
+                document.getElementById('test-results').innerHTML = '<div class="text-green-600">✅ 數據保存成功！圖表已實時更新</div>';
+            } catch (error) {
+                document.getElementById('test-results').innerHTML = `<div class="text-red-600">❌ 保存失敗: ${error.message}</div>`;
+            }
+        }
+
+        // 評估函數
+        function assessBloodPressure(systolic, diastolic) {
+            if (systolic >= 180 || diastolic >= 110) {
+                return { level: '高血压3级', color: 'red', advice: '立即就医' };
+            } else if (systolic >= 160 || diastolic >= 100) {
+                return { level: '高血压2级', color: 'orange', advice: '建议就医' };
+            } else if (systolic >= 140 || diastolic >= 90) {
+                return { level: '高血压1级', color: 'yellow', advice: '注意监测' };
+            } else if (systolic >= 130 || diastolic >= 85) {
+                return { level: '正常高值', color: 'blue', advice: '保持健康' };
+            } else if (systolic >= 120 || diastolic >= 80) {
+                return { level: '正常', color: 'green', advice: '良好' };
+            } else {
+                return { level: '理想', color: 'green', advice: '优秀' };
+            }
+        }
+
+        function assessSpO2(percent) {
+            if (percent >= 98) return { level: '正常', color: 'green', advice: '血氧良好' };
+            if (percent >= 95) return { level: '正常', color: 'green', advice: '血氧正常' };
+            if (percent >= 90) return { level: '偏低', color: 'yellow', advice: '注意监测' };
+            return { level: '低', color: 'red', advice: '建议就医' };
+        }
+
+        function assessTemperature(temp) {
+            if (temp >= 36.0 && temp <= 37.2) return { level: '正常', color: 'green', advice: '体温正常' };
+            if (temp >= 35.5 && temp <= 37.5) return { level: '正常', color: 'green', advice: '体温正常' };
+            if (temp >= 35.0 && temp <= 38.0) return { level: '注意', color: 'yellow', advice: '注意监测' };
+            return { level: '异常', color: 'red', advice: '建议就医' };
+        }
+
+        // 頁面加載完成後初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const timeString = now.toISOString().slice(0, 16);
+            document.getElementById('device-time').value = timeString;
+            
+            // 初始化圖表
+            updateAllCharts();
+            
+            document.getElementById('test-results').innerHTML = '<div class="text-blue-600">ℹ️ 頁面加載完成，圖表已初始化。請錄入數據測試實時更新功能。</div>';
+        });
+    </script>
+</body>
+</html>

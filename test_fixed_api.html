@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>修复后的API测试</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">修复后的API测试</h1>
+        
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">修复内容</h2>
+            <div class="space-y-3">
+                <div class="flex items-center">
+                    <span class="w-3 h-3 bg-green-500 rounded-full mr-3"></span>
+                    <span>更新了API密钥配置</span>
+                </div>
+                <div class="flex items-center">
+                    <span class="w-3 h-3 bg-green-500 rounded-full mr-3"></span>
+                    <span>添加了详细的错误日志</span>
+                </div>
+                <div class="flex items-center">
+                    <span class="w-3 h-3 bg-green-500 rounded-full mr-3"></span>
+                    <span>验证了API密钥有效性</span>
+                </div>
+                <div class="flex items-center">
+                    <span class="w-3 h-3 bg-green-500 rounded-full mr-3"></span>
+                    <span>重启了代理服务器</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">测试功能</h2>
+            <div class="flex flex-wrap gap-4">
+                <button onclick="testSimpleRequest()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded flex items-center">
+                    <i class="fa fa-comment mr-2"></i>测试简单请求
+                </button>
+                <button onclick="testDietAdviceRequest()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded flex items-center">
+                    <i class="fa fa-lightbulb-o mr-2"></i>测试饮食建议请求
+                </button>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">测试结果</h2>
+            <div id="test-results" class="space-y-4">
+                <div class="text-gray-500">点击上方按钮开始测试...</div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">说明</h2>
+            <div class="text-sm text-gray-600 space-y-2">
+                <p>✅ API密钥已验证有效</p>
+                <p>✅ 代理服务器已重启并添加详细日志</p>
+                <p>✅ 现在应该可以正常使用AI饮食建议功能</p>
+                <p>💡 如果仍有问题，请检查浏览器控制台的详细日志</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_KEY = 'sk-ef5d339bf70b4f4d8e0657db5ba02d22';
+        const PROXY_URL = 'http://localhost:3000';
+
+        // 测试简单请求
+        async function testSimpleRequest() {
+            try {
+                updateResults('🔄 正在测试简单请求...');
+                
+                const response = await fetch(`${PROXY_URL}/api/chat`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${API_KEY}`
+                    },
+                    body: JSON.stringify({
+                        model: 'deepseek-chat',
+                        messages: [
+                            {
+                                role: 'user',
+                                content: '请简单介绍一下健康饮食的重要性。'
+                            }
+                        ]
+                    })
+                });
+                
+                console.log('响应状态:', response.status);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('响应数据:', data);
+                    
+                    if (data.choices && data.choices[0]) {
+                        const content = data.choices[0].message.content;
+                        displayResult('简单请求测试', content);
+                        updateResults('✅ 简单请求测试成功');
+                    } else {
+                        updateResults('❌ 响应格式异常');
+                    }
+                } else {
+                    const errorData = await response.json();
+                    console.error('错误数据:', errorData);
+                    updateResults('❌ 请求失败: ' + JSON.stringify(errorData));
+                }
+            } catch (error) {
+                console.error('请求异常:', error);
+                updateResults('❌ 请求异常: ' + error.message);
+            }
+        }
+
+        // 测试饮食建议请求
+        async function testDietAdviceRequest() {
+            try {
+                updateResults('🔄 正在测试饮食建议请求...');
+                
+                const prompt = `
+作为专业的营养师，请根据以下用户的健康数据，提供个性化的饮食建议：
+
+**基本信息：**
+- 年龄: 65岁
+- 性别: 男
+- BMI: 26.0
+
+**健康指标：**
+- 血压: 145/90 mmHg
+- 血糖: 110 mg/dL
+
+请提供3-5条具体的饮食建议，用中文回答。
+                `;
+                
+                const response = await fetch(`${PROXY_URL}/api/chat`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${API_KEY}`
+                    },
+                    body: JSON.stringify({
+                        model: 'deepseek-chat',
+                        messages: [
+                            {
+                                role: 'user',
+                                content: prompt
+                            }
+                        ]
+                    })
+                });
+                
+                console.log('响应状态:', response.status);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('响应数据:', data);
+                    
+                    if (data.choices && data.choices[0]) {
+                        const content = data.choices[0].message.content;
+                        displayResult('饮食建议测试', content);
+                        updateResults('✅ 饮食建议请求测试成功');
+                    } else {
+                        updateResults('❌ 响应格式异常');
+                    }
+                } else {
+                    const errorData = await response.json();
+                    console.error('错误数据:', errorData);
+                    updateResults('❌ 请求失败: ' + JSON.stringify(errorData));
+                }
+            } catch (error) {
+                console.error('请求异常:', error);
+                updateResults('❌ 请求异常: ' + error.message);
+            }
+        }
+
+        // 显示结果
+        function displayResult(title, content) {
+            const resultsDiv = document.getElementById('test-results');
+            const formattedContent = content.replace(/\n/g, '<br>');
+            
+            resultsDiv.innerHTML += `
+                <div class="bg-blue-50 p-4 rounded-lg mt-4">
+                    <div class="flex items-start">
+                        <i class="fa fa-lightbulb-o text-blue-500 text-xl mr-3 mt-1"></i>
+                        <div class="flex-1">
+                            <h4 class="font-semibold text-blue-800 mb-2">${title}</h4>
+                            <div class="text-blue-700 text-sm leading-relaxed max-h-64 overflow-y-auto">
+                                ${formattedContent}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 更新测试结果
+        function updateResults(message) {
+            const resultsDiv = document.getElementById('test-results');
+            const timestamp = new Date().toLocaleTimeString();
+            const existingContent = resultsDiv.innerHTML;
+            
+            if (existingContent.includes('点击上方按钮开始测试')) {
+                resultsDiv.innerHTML = `<div class="text-green-600">[${timestamp}] ${message}</div>`;
+            } else {
+                resultsDiv.innerHTML = existingContent + `<div class="text-green-600">[${timestamp}] ${message}</div>`;
+            }
+        }
+
+        // 页面加载时显示欢迎信息
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('修复后的API测试页面已加载');
+            updateResults('页面加载完成，可以开始测试');
+        });
+    </script>
+</body>
+</html>

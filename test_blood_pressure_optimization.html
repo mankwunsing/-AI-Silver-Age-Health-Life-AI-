@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>血壓數據優化測試</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <style>
+        .input-field {
+            @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+        }
+        .card {
+            @apply bg-white rounded-xl shadow-lg p-6;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">血壓數據優化測試</h1>
+        
+        <!-- 優化說明 -->
+        <div class="card mb-6">
+            <h2 class="text-xl font-semibold mb-4">優化說明</h2>
+            <div class="bg-green-50 border-l-4 border-green-400 p-4 rounded">
+                <div class="flex items-center">
+                    <i class="fa fa-check-circle text-green-500 mr-2"></i>
+                    <p class="text-green-700">
+                        <strong>優化完成</strong>：移除了個人資料中重複的血壓輸入欄位，血壓數據現在統一從智能設備數據錄入中獲取
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 智能設備數據錄入 -->
+        <div class="card mb-6">
+            <h2 class="text-xl font-semibold mb-4">智能設備數據錄入</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">收縮壓 (mmHg)</label>
+                    <input type="number" id="bp-systolic" placeholder="120" class="input-field" min="60" max="250">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">舒張壓 (mmHg)</label>
+                    <input type="number" id="bp-diastolic" placeholder="80" class="input-field" min="40" max="150">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">脈搏 (bpm)</label>
+                    <input type="number" id="bp-pulse" placeholder="72" class="input-field" min="30" max="200">
+                </div>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-base mb-2">測量時間</label>
+                    <input type="datetime-local" id="device-time" class="input-field">
+                </div>
+                <div>
+                    <label class="block text-base mb-2">備註</label>
+                    <textarea id="device-notes" placeholder="例如：餐後測量、運動後測量等" class="input-field" rows="3"></textarea>
+                </div>
+                <button onclick="saveBloodPressureData()" class="w-full py-4 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl text-lg font-bold hover:from-green-600 hover:to-green-700 transition-all duration-300 shadow-xl border-2 border-green-400 transform hover:scale-105">
+                    <i class="fa fa-save mr-2 text-xl"></i> 💾 保存血壓數據
+                </button>
+            </div>
+        </div>
+
+        <!-- 個人資料（已優化） -->
+        <div class="card mb-6">
+            <h2 class="text-xl font-semibold mb-4">個人資料（已優化）</h2>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-base mb-2">年齡</label>
+                    <input type="number" id="assessment-age" placeholder="請輸入年齡" class="input-field">
+                </div>
+                
+                <!-- 血壓數據提示 -->
+                <div class="bg-blue-50 border-l-4 border-blue-400 p-3 rounded">
+                    <div class="flex items-center">
+                        <i class="fa fa-info-circle text-blue-500 mr-2"></i>
+                        <p class="text-sm text-blue-700">
+                            <strong>血壓數據</strong>：將從智能設備數據錄入中自動獲取，無需在此填寫
+                        </p>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-base mb-2">BMI</label>
+                    <input type="number" id="assessment-bmi" placeholder="例如：22.5" class="input-field">
+                </div>
+                <div>
+                    <label class="block text-base mb-2">血糖 (mg/dL)</label>
+                    <input type="number" id="assessment-glucose" placeholder="例如：100" class="input-field">
+                </div>
+            </div>
+        </div>
+
+        <!-- 健康評估測試 -->
+        <div class="card mb-6">
+            <h2 class="text-xl font-semibold mb-4">健康評估測試</h2>
+            <button onclick="runHealthAssessment()" class="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600">
+                <i class="fa fa-calculator mr-2"></i>運行健康評估
+            </button>
+        </div>
+
+        <!-- 測試結果 -->
+        <div class="card">
+            <h2 class="text-xl font-semibold mb-4">測試結果</h2>
+            <div id="test-results" class="bg-gray-50 p-4 rounded text-sm font-mono">
+                <p class="text-gray-500">請先錄入血壓數據，然後運行健康評估...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 保存血壓數據
+        function saveBloodPressureData() {
+            const systolic = parseInt(document.getElementById('bp-systolic').value);
+            const diastolic = parseInt(document.getElementById('bp-diastolic').value);
+            const pulse = parseInt(document.getElementById('bp-pulse').value);
+            const time = document.getElementById('device-time').value || new Date().toISOString().slice(0, 16);
+            const notes = document.getElementById('device-notes').value;
+            
+            if (!systolic || !diastolic || !pulse) {
+                document.getElementById('test-results').innerHTML = '<div class="text-red-600">❌ 請填寫完整的血壓數據</div>';
+                return;
+            }
+            
+            try {
+                const deviceData = {
+                    id: Date.now(),
+                    type: '血压',
+                    device: '血压计',
+                    time: time,
+                    notes: notes,
+                    timestamp: new Date().toISOString(),
+                    data: {
+                        systolic: systolic,
+                        diastolic: diastolic,
+                        pulse: pulse,
+                        assessment: assessBloodPressure(systolic, diastolic)
+                    }
+                };
+                
+                const healthRecords = JSON.parse(localStorage.getItem('healthRecords') || '[]');
+                healthRecords.push(deviceData);
+                localStorage.setItem('healthRecords', JSON.stringify(healthRecords));
+                
+                // 清空表單
+                document.getElementById('bp-systolic').value = '';
+                document.getElementById('bp-diastolic').value = '';
+                document.getElementById('bp-pulse').value = '';
+                document.getElementById('device-time').value = '';
+                document.getElementById('device-notes').value = '';
+                
+                document.getElementById('test-results').innerHTML = '<div class="text-green-600">✅ 血壓數據保存成功！現在可以運行健康評估</div>';
+            } catch (error) {
+                document.getElementById('test-results').innerHTML = `<div class="text-red-600">❌ 保存失敗: ${error.message}</div>`;
+            }
+        }
+
+        // 血壓評估
+        function assessBloodPressure(systolic, diastolic) {
+            if (systolic >= 180 || diastolic >= 110) {
+                return { level: '高血压3级', color: 'red', advice: '立即就医' };
+            } else if (systolic >= 160 || diastolic >= 100) {
+                return { level: '高血压2级', color: 'orange', advice: '建议就医' };
+            } else if (systolic >= 140 || diastolic >= 90) {
+                return { level: '高血压1级', color: 'yellow', advice: '注意监测' };
+            } else if (systolic >= 130 || diastolic >= 85) {
+                return { level: '正常高值', color: 'blue', advice: '保持健康' };
+            } else if (systolic >= 120 || diastolic >= 80) {
+                return { level: '正常', color: 'green', advice: '良好' };
+            } else {
+                return { level: '理想', color: 'green', advice: '优秀' };
+            }
+        }
+
+        // 獲取最新設備數據
+        function getLatestDeviceData() {
+            try {
+                const healthRecords = JSON.parse(localStorage.getItem('healthRecords') || '[]');
+                const deviceRecords = healthRecords.filter(record => record.device);
+                
+                const latestData = {
+                    bloodPressure: null,
+                    heartRate: null,
+                    temperature: null,
+                    spO2: null
+                };
+                
+                const bpRecords = deviceRecords.filter(record => record.type === '血压' || record.type === '血壓').sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                if (bpRecords.length > 0) {
+                    const latestBP = bpRecords[0];
+                    latestData.bloodPressure = {
+                        systolic: latestBP.data.systolic,
+                        diastolic: latestBP.data.diastolic,
+                        pulse: latestBP.data.pulse,
+                        assessment: latestBP.data.assessment,
+                        time: latestBP.time
+                    };
+                }
+                
+                return latestData;
+            } catch (error) {
+                console.error('獲取設備數據失敗:', error);
+                return { bloodPressure: null, heartRate: null, temperature: null, spO2: null };
+            }
+        }
+
+        // 運行健康評估
+        function runHealthAssessment() {
+            const age = parseInt(document.getElementById('assessment-age')?.value) || 0;
+            const bmi = parseFloat(document.getElementById('assessment-bmi')?.value) || 0;
+            const glucose = parseInt(document.getElementById('assessment-glucose')?.value) || 0;
+            
+            // 從智能設備數據中獲取血壓數據
+            const deviceData = getLatestDeviceData();
+            const systolic = deviceData.bloodPressure?.systolic || 0;
+            const diastolic = deviceData.bloodPressure?.diastolic || 0;
+            
+            if (systolic === 0 || diastolic === 0) {
+                document.getElementById('test-results').innerHTML = '<div class="text-yellow-600">⚠️ 請先錄入血壓數據，然後再運行健康評估</div>';
+                return;
+            }
+            
+            // 模擬健康評估
+            const riskScore = calculateRiskScore(age, systolic, diastolic, bmi, glucose);
+            const riskLevel = getRiskLevel(riskScore);
+            
+            const result = `
+                <div class="space-y-3">
+                    <div class="bg-blue-50 p-4 rounded-lg">
+                        <h3 class="font-semibold text-blue-800 mb-2">健康評估結果</h3>
+                        <p class="text-sm text-blue-700">風險評分: ${riskScore.toFixed(2)}</p>
+                        <p class="text-sm text-blue-700">風險等級: ${riskLevel}</p>
+                    </div>
+                    
+                    <div class="bg-green-50 p-4 rounded-lg">
+                        <h3 class="font-semibold text-green-800 mb-2">使用的數據</h3>
+                        <ul class="text-sm text-green-700 space-y-1">
+                            <li>• 年齡: ${age || '未提供'}</li>
+                            <li>• 血壓: ${systolic}/${diastolic} mmHg (來自智能設備)</li>
+                            <li>• BMI: ${bmi || '未提供'}</li>
+                            <li>• 血糖: ${glucose || '未提供'}</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="text-sm text-gray-600">
+                        ✅ 血壓數據成功從智能設備錄入中獲取，無需重複填寫！
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('test-results').innerHTML = result;
+        }
+
+        // 計算風險評分
+        function calculateRiskScore(age, systolic, diastolic, bmi, glucose) {
+            let score = 0;
+            
+            // 年齡風險
+            if (age > 65) score += 0.3;
+            else if (age > 50) score += 0.2;
+            else if (age > 35) score += 0.1;
+            
+            // 血壓風險
+            if (systolic >= 140 || diastolic >= 90) score += 0.4;
+            else if (systolic >= 130 || diastolic >= 85) score += 0.2;
+            
+            // BMI風險
+            if (bmi > 30) score += 0.2;
+            else if (bmi > 25) score += 0.1;
+            
+            // 血糖風險
+            if (glucose > 126) score += 0.3;
+            else if (glucose > 100) score += 0.1;
+            
+            return Math.min(score, 1.0);
+        }
+
+        // 獲取風險等級
+        function getRiskLevel(score) {
+            if (score >= 0.7) return '高風險';
+            if (score >= 0.4) return '中等風險';
+            if (score >= 0.2) return '低風險';
+            return '極低風險';
+        }
+
+        // 頁面加載完成後設置默認時間
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const timeString = now.toISOString().slice(0, 16);
+            document.getElementById('device-time').value = timeString;
+        });
+    </script>
+</body>
+</html>

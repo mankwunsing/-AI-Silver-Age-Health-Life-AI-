@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>專業健康報告測試</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">專業健康報告測試</h1>
+        
+        <!-- 測試數據錄入 -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">1. 添加測試數據</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <div>
+                    <label class="block text-sm font-medium mb-2">血壓收縮壓</label>
+                    <input type="number" id="test-systolic" class="w-full p-2 border rounded" placeholder="120" value="130">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2">血壓舒張壓</label>
+                    <input type="number" id="test-diastolic" class="w-full p-2 border rounded" placeholder="80" value="85">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2">脈搏</label>
+                    <input type="number" id="test-pulse" class="w-full p-2 border rounded" placeholder="72" value="75">
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <div>
+                    <label class="block text-sm font-medium mb-2">血氧飽和度 (%)</label>
+                    <input type="number" id="test-spo2" class="w-full p-2 border rounded" placeholder="98" value="97">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2">灌注指數 (%)</label>
+                    <input type="number" id="test-pi" class="w-full p-2 border rounded" placeholder="2.5" value="2.8">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2">脈搏率 (bpm)</label>
+                    <input type="number" id="test-pr" class="w-full p-2 border rounded" placeholder="72" value="75">
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label class="block text-sm font-medium mb-2">體溫 (°C)</label>
+                    <input type="number" id="test-temp" class="w-full p-2 border rounded" placeholder="36.5" value="37.2" step="0.1">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2">測量部位</label>
+                    <select id="test-location" class="w-full p-2 border rounded">
+                        <option value="腋下">腋下</option>
+                        <option value="口腔">口腔</option>
+                        <option value="肛門">肛門</option>
+                        <option value="額頭">額頭</option>
+                    </select>
+                </div>
+            </div>
+            <button onclick="addAllTestData()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                <i class="fa fa-plus mr-2"></i>添加所有測試數據
+            </button>
+        </div>
+
+        <!-- 查看存儲的數據 -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">2. 查看存儲的數據</h2>
+            <button onclick="showStoredData()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 mb-4">
+                <i class="fa fa-eye mr-2"></i>顯示存儲數據
+            </button>
+            <div id="stored-data" class="bg-gray-50 p-4 rounded text-sm font-mono"></div>
+        </div>
+
+        <!-- 測試數據讀取功能 -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">3. 測試數據讀取功能</h2>
+            <button onclick="testDataReading()" class="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600 mb-4">
+                <i class="fa fa-search mr-2"></i>測試數據讀取
+            </button>
+            <div id="data-reading-result" class="bg-gray-50 p-4 rounded text-sm"></div>
+        </div>
+
+        <!-- 生成健康報告 -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold mb-4">4. 生成專業健康報告</h2>
+            <button onclick="generateTestReport()" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 mb-4">
+                <i class="fa fa-file-text mr-2"></i>生成健康報告
+            </button>
+            <div id="health-report" class="bg-gray-50 p-4 rounded text-sm"></div>
+        </div>
+    </div>
+
+    <script>
+        // 添加所有測試數據
+        function addAllTestData() {
+            // 添加血壓數據
+            const systolic = parseInt(document.getElementById('test-systolic').value);
+            const diastolic = parseInt(document.getElementById('test-diastolic').value);
+            const pulse = parseInt(document.getElementById('test-pulse').value);
+            
+            const bpData = {
+                id: Date.now(),
+                type: '血压',
+                device: '血压计',
+                time: new Date().toISOString().slice(0, 16),
+                notes: '測試血壓數據',
+                timestamp: new Date().toISOString(),
+                data: {
+                    systolic: systolic,
+                    diastolic: diastolic,
+                    pulse: pulse,
+                    assessment: {
+                        level: systolic < 120 && diastolic < 80 ? '正常' : '偏高',
+                        advice: systolic < 120 && diastolic < 80 ? '血壓正常，請保持良好生活習慣' : '血壓偏高，建議諮詢醫生'
+                    }
+                }
+            };
+            
+            // 添加血氧數據
+            const spo2 = parseFloat(document.getElementById('test-spo2').value);
+            const pi = parseFloat(document.getElementById('test-pi').value);
+            const pr = parseInt(document.getElementById('test-pr').value);
+            
+            const spo2Data = {
+                id: Date.now() + 1,
+                type: '血氧',
+                device: '血氧计',
+                time: new Date().toISOString().slice(0, 16),
+                notes: '測試血氧數據',
+                timestamp: new Date().toISOString(),
+                data: {
+                    percent: spo2,
+                    pi: pi,
+                    pr: pr,
+                    assessment: {
+                        level: spo2 >= 95 ? '正常' : '偏低',
+                        advice: spo2 >= 95 ? '血氧飽和度正常' : '血氧飽和度偏低，建議諮詢醫生'
+                    }
+                }
+            };
+            
+            // 添加體溫數據
+            const temp = parseFloat(document.getElementById('test-temp').value);
+            const location = document.getElementById('test-location').value;
+            
+            const tempData = {
+                id: Date.now() + 2,
+                type: '体温',
+                device: '温度计',
+                time: new Date().toISOString().slice(0, 16),
+                notes: '測試體溫數據',
+                timestamp: new Date().toISOString(),
+                data: {
+                    value: temp,
+                    location: location,
+                    assessment: {
+                        level: temp < 37.5 ? '正常' : '偏高',
+                        advice: temp < 37.5 ? '體溫正常' : '體溫偏高，建議休息並觀察'
+                    }
+                }
+            };
+            
+            // 保存到本地存儲
+            const healthRecords = JSON.parse(localStorage.getItem('healthRecords') || '[]');
+            healthRecords.push(bpData, spo2Data, tempData);
+            localStorage.setItem('healthRecords', JSON.stringify(healthRecords));
+            
+            alert('所有測試數據添加成功！');
+        }
+        
+        // 顯示存儲的數據
+        function showStoredData() {
+            const healthRecords = JSON.parse(localStorage.getItem('healthRecords') || '[]');
+            const deviceRecords = healthRecords.filter(record => record.device);
+            
+            document.getElementById('stored-data').innerHTML = 
+                `<strong>總記錄數：</strong>${healthRecords.length}<br>
+                <strong>設備記錄數：</strong>${deviceRecords.length}<br>
+                <strong>血壓記錄：</strong>${deviceRecords.filter(r => r.type === '血压' || r.type === '血壓').length}<br>
+                <strong>血氧記錄：</strong>${deviceRecords.filter(r => r.type === '血氧').length}<br>
+                <strong>體溫記錄：</strong>${deviceRecords.filter(r => r.type === '体温' || r.type === '體溫').length}<br>
+                <strong>詳細數據：</strong><br>
+                <pre>${JSON.stringify(deviceRecords, null, 2)}</pre>`;
+        }
+        
+        // 測試數據讀取功能
+        function testDataReading() {
+            const latestData = getLatestDeviceData();
+            
+            let result = '<strong>數據讀取結果：</strong><br>';
+            result += `血壓數據：${latestData.bloodPressure ? '✓ 找到' : '✗ 未找到'}<br>`;
+            result += `血氧數據：${latestData.spO2 ? '✓ 找到' : '✗ 未找到'}<br>`;
+            result += `體溫數據：${latestData.temperature ? '✓ 找到' : '✗ 未找到'}<br>`;
+            
+            if (latestData.bloodPressure) {
+                result += `<br><strong>血壓詳情：</strong><br>`;
+                result += `收縮壓：${latestData.bloodPressure.systolic} mmHg<br>`;
+                result += `舒張壓：${latestData.bloodPressure.diastolic} mmHg<br>`;
+                result += `脈搏：${latestData.bloodPressure.pulse} bpm<br>`;
+            }
+            
+            if (latestData.spO2) {
+                result += `<br><strong>血氧詳情：</strong><br>`;
+                result += `血氧飽和度：${latestData.spO2.percent}%<br>`;
+                result += `灌注指數：${latestData.spO2.pi}%<br>`;
+                result += `脈搏率：${latestData.spO2.pr} bpm<br>`;
+            }
+            
+            if (latestData.temperature) {
+                result += `<br><strong>體溫詳情：</strong><br>`;
+                result += `體溫：${latestData.temperature.value}°C<br>`;
+                result += `測量部位：${latestData.temperature.location}<br>`;
+            }
+            
+            document.getElementById('data-reading-result').innerHTML = result;
+        }
+        
+        // 生成測試報告
+        async function generateTestReport() {
+            document.getElementById('health-report').innerHTML = '<i class="fa fa-spinner fa-spin mr-2"></i>正在生成健康報告...';
+            
+            try {
+                const healthData = collectHealthData();
+                const report = await generateProfessionalHealthReport(healthData);
+                document.getElementById('health-report').innerHTML = `<strong>健康報告：</strong><br><pre>${report}</pre>`;
+            } catch (error) {
+                document.getElementById('health-report').innerHTML = `<strong>錯誤：</strong>${error.message}`;
+            }
+        }
+        
+        // 獲取最新的智能設備數據（複製自主頁面）
+        function getLatestDeviceData() {
+            const healthRecords = JSON.parse(localStorage.getItem('healthRecords') || '[]');
+            const deviceRecords = healthRecords.filter(record => record.device);
+            
+            const latestData = {
+                bloodPressure: null,
+                heartRate: null,
+                temperature: null,
+                spO2: null,
+                lastUpdate: null
+            };
+            
+            // 獲取最新的血壓數據
+            const bpRecords = deviceRecords.filter(record => record.type === '血压' || record.type === '血壓').sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            if (bpRecords.length > 0) {
+                const latestBP = bpRecords[0];
+                latestData.bloodPressure = {
+                    systolic: latestBP.data.systolic,
+                    diastolic: latestBP.data.diastolic,
+                    pulse: latestBP.data.pulse,
+                    assessment: latestBP.data.assessment,
+                    time: latestBP.time
+                };
+                latestData.heartRate = latestBP.data.pulse;
+                latestData.lastUpdate = latestBP.timestamp;
+            }
+            
+            // 獲取最新的血氧數據
+            const spo2Records = deviceRecords.filter(record => record.type === '血氧').sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            if (spo2Records.length > 0) {
+                const latestSpO2 = spo2Records[0];
+                latestData.spO2 = {
+                    percent: latestSpO2.data.percent,
+                    pi: latestSpO2.data.pi,
+                    pr: latestSpO2.data.pr,
+                    assessment: latestSpO2.data.assessment,
+                    time: latestSpO2.time
+                };
+                if (!latestData.lastUpdate || new Date(latestSpO2.timestamp) > new Date(latestData.lastUpdate)) {
+                    latestData.lastUpdate = latestSpO2.timestamp;
+                }
+            }
+            
+            // 獲取最新的體溫數據
+            const tempRecords = deviceRecords.filter(record => record.type === '体温' || record.type === '體溫').sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            if (tempRecords.length > 0) {
+                const latestTemp = tempRecords[0];
+                latestData.temperature = {
+                    value: latestTemp.data.value,
+                    location: latestTemp.data.location,
+                    assessment: latestTemp.data.assessment,
+                    time: latestTemp.time
+                };
+                if (!latestData.lastUpdate || new Date(latestTemp.timestamp) > new Date(latestData.lastUpdate)) {
+                    latestData.lastUpdate = latestTemp.timestamp;
+                }
+            }
+            
+            return latestData;
+        }
+        
+        // 收集健康數據（複製自主頁面）
+        function collectHealthData() {
+            const deviceData = getLatestDeviceData();
+            
+            return {
+                age: 65, // 測試年齡
+                gender: '未提供',
+                bloodPressure: {
+                    systolic: deviceData.bloodPressure?.systolic || null,
+                    diastolic: deviceData.bloodPressure?.diastolic || null
+                },
+                bmi: null,
+                glucose: null,
+                heartRate: deviceData.heartRate || null,
+                temperature: deviceData.temperature || null,
+                spO2: deviceData.spO2 || null,
+                diabetes: false,
+                hypertension: false,
+                heartDisease: false,
+                smoking: false,
+                exercise: true,
+                exerciseFrequency: null,
+                deviceData: deviceData
+            };
+        }
+        
+        // 生成專業健康報告（簡化版）
+        async function generateProfessionalHealthReport(healthData) {
+            const currentDate = new Date().toLocaleDateString('zh-CN', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                weekday: 'long'
+            });
+            
+            let report = `專業健康分析報告\n`;
+            report += `生成日期：${currentDate}\n\n`;
+            
+            report += `用戶基本信息：\n`;
+            report += `- 年齡: ${healthData.age || '未提供'}\n`;
+            report += `- 性別: ${healthData.gender || '未提供'}\n\n`;
+            
+            report += `基礎健康指標：\n`;
+            report += `- 血壓: ${healthData.bloodPressure?.systolic && healthData.bloodPressure?.diastolic ? 
+                `${healthData.bloodPressure.systolic}/${healthData.bloodPressure.diastolic} mmHg` : '未測量'}\n`;
+            report += `- BMI: ${healthData.bmi || '未計算'}\n`;
+            report += `- 血糖: ${healthData.glucose || '未測量'}\n`;
+            report += `- 心率: ${healthData.heartRate || '未測量'}\n\n`;
+            
+            report += `智能設備監測數據：\n`;
+            if (healthData.deviceData.bloodPressure) {
+                report += `- 最新血壓數據 (${healthData.deviceData.bloodPressure.time}):\n`;
+                report += `  * 收縮壓: ${healthData.deviceData.bloodPressure.systolic} mmHg\n`;
+                report += `  * 舒張壓: ${healthData.deviceData.bloodPressure.diastolic} mmHg\n`;
+                report += `  * 脈搏: ${healthData.deviceData.bloodPressure.pulse} bpm\n`;
+                report += `  * 評估: ${healthData.deviceData.bloodPressure.assessment.level} - ${healthData.deviceData.bloodPressure.assessment.advice}\n\n`;
+            }
+            
+            if (healthData.deviceData.spO2) {
+                report += `- 最新血氧數據 (${healthData.deviceData.spO2.time}):\n`;
+                report += `  * 血氧飽和度: ${healthData.deviceData.spO2.percent}%\n`;
+                report += `  * 灌注指數: ${healthData.deviceData.spO2.pi}%\n`;
+                report += `  * 脈搏率: ${healthData.deviceData.spO2.pr} bpm\n`;
+                report += `  * 評估: ${healthData.deviceData.spO2.assessment.level} - ${healthData.deviceData.spO2.assessment.advice}\n\n`;
+            }
+            
+            if (healthData.deviceData.temperature) {
+                report += `- 最新體溫數據 (${healthData.deviceData.temperature.time}):\n`;
+                report += `  * 體溫: ${healthData.deviceData.temperature.value}°C\n`;
+                report += `  * 測量部位: ${healthData.deviceData.temperature.location}\n`;
+                report += `  * 評估: ${healthData.deviceData.temperature.assessment.level} - ${healthData.deviceData.temperature.assessment.advice}\n\n`;
+            }
+            
+            report += `健康建議：\n`;
+            if (healthData.deviceData.bloodPressure && healthData.deviceData.bloodPressure.systolic > 130) {
+                report += `- 血壓偏高，建議控制飲食，減少鈉鹽攝入，適量運動\n`;
+            }
+            if (healthData.deviceData.spO2 && healthData.deviceData.spO2.percent < 95) {
+                report += `- 血氧飽和度偏低，建議諮詢醫生\n`;
+            }
+            if (healthData.deviceData.temperature && healthData.deviceData.temperature.value > 37.5) {
+                report += `- 體溫偏高，建議休息並觀察，如有不適請及時就醫\n`;
+            }
+            
+            return report;
+        }
+    </script>
+</body>
+</html>

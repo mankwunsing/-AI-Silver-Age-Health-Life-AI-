@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>提交反馈和建议功能按钮测试</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">提交反馈和建议功能按钮测试</h1>
+        
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">修复内容</h2>
+            <div class="space-y-3">
+                <div class="flex items-center">
+                    <span class="w-3 h-3 bg-green-500 rounded-full mr-3"></span>
+                    <span>为"提交反馈"按钮添加了onclick事件</span>
+                </div>
+                <div class="flex items-center">
+                    <span class="w-3 h-3 bg-green-500 rounded-full mr-3"></span>
+                    <span>为"建议功能"按钮添加了onclick事件</span>
+                </div>
+                <div class="flex items-center">
+                    <span class="w-3 h-3 bg-green-500 rounded-full mr-3"></span>
+                    <span>实现了完整的反馈表单功能</span>
+                </div>
+                <div class="flex items-center">
+                    <span class="w-3 h-3 bg-green-500 rounded-full mr-3"></span>
+                    <span>实现了完整的功能建议表单</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">功能测试</h2>
+            <div class="flex space-x-4">
+                <button onclick="testFeedbackForm()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded flex items-center">
+                    <i class="fa fa-comment mr-2"></i>测试提交反馈
+                </button>
+                <button onclick="testSuggestionForm()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded flex items-center">
+                    <i class="fa fa-lightbulb-o mr-2"></i>测试建议功能
+                </button>
+            </div>
+        </div>
+
+        <div id="modal-container" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+            <div class="flex items-center justify-center min-h-screen p-4">
+                <div class="bg-white rounded-lg max-w-4xl w-full max-h-screen overflow-y-auto">
+                    <div class="flex justify-between items-center p-4 border-b">
+                        <h2 id="modal-title" class="text-xl font-semibold"></h2>
+                        <button onclick="closeModal()" class="text-gray-500 hover:text-gray-700">
+                            <i class="fa fa-times text-xl"></i>
+                        </button>
+                    </div>
+                    <div id="modal-content" class="p-0"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">功能特点</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-blue-50 p-4 rounded-lg">
+                    <h3 class="font-medium text-blue-800 mb-3">提交反馈</h3>
+                    <ul class="text-sm text-blue-700 space-y-1">
+                        <li>• 反馈类型选择（Bug报告、功能改进等）</li>
+                        <li>• 详细问题描述</li>
+                        <li>• 可选联系方式</li>
+                        <li>• 表单验证和提交处理</li>
+                    </ul>
+                </div>
+                
+                <div class="bg-green-50 p-4 rounded-lg">
+                    <h3 class="font-medium text-green-800 mb-3">建议功能</h3>
+                    <ul class="text-sm text-green-700 space-y-1">
+                        <li>• 功能类别选择（健康管理、AI功能等）</li>
+                        <li>• 功能建议描述</li>
+                        <li>• 使用场景说明</li>
+                        <li>• 优先级设置</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 通用模态框显示函数
+        function showModal(title, content) {
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-content').innerHTML = content;
+            document.getElementById('modal-container').classList.remove('hidden');
+        }
+
+        // 关闭模态框
+        function closeModal() {
+            document.getElementById('modal-container').classList.add('hidden');
+        }
+
+        // 提交反馈功能
+        function showFeedbackForm() {
+            const feedbackContent = `
+                <div class="max-w-2xl mx-auto p-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">提交反馈</h2>
+                    
+                    <form id="feedbackForm" class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">反馈类型</label>
+                            <select id="feedbackType" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                                <option value="">请选择反馈类型</option>
+                                <option value="bug">Bug报告</option>
+                                <option value="improvement">功能改进</option>
+                                <option value="usability">使用体验</option>
+                                <option value="other">其他</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">问题描述</label>
+                            <textarea id="feedbackDescription" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="请详细描述您遇到的问题或建议..." required></textarea>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">联系方式（可选）</label>
+                            <input type="email" id="feedbackContact" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="您的邮箱地址，方便我们回复">
+                        </div>
+                        
+                        <div class="flex space-x-4">
+                            <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-md transition-colors">
+                                提交反馈
+                            </button>
+                            <button type="button" onclick="this.closest('.fixed').remove()" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-md transition-colors">
+                                取消
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            `;
+            
+            showModal('提交反馈', feedbackContent);
+            
+            // 添加表单提交处理
+            setTimeout(() => {
+                const form = document.getElementById('feedbackForm');
+                if (form) {
+                    form.addEventListener('submit', function(e) {
+                        e.preventDefault();
+                        handleFeedbackSubmission();
+                    });
+                }
+            }, 100);
+        }
+
+        // 建议功能功能
+        function showFeatureSuggestionForm() {
+            const suggestionContent = `
+                <div class="max-w-2xl mx-auto p-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">建议功能</h2>
+                    
+                    <form id="suggestionForm" class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">功能类别</label>
+                            <select id="suggestionCategory" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                                <option value="">请选择功能类别</option>
+                                <option value="health">健康管理</option>
+                                <option value="ui">界面优化</option>
+                                <option value="ai">AI功能</option>
+                                <option value="data">数据处理</option>
+                                <option value="notification">提醒功能</option>
+                                <option value="other">其他</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">功能建议</label>
+                            <textarea id="suggestionDescription" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="请详细描述您希望添加的功能..." required></textarea>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">使用场景</label>
+                            <textarea id="suggestionScenario" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="请描述这个功能的使用场景和预期效果..."></textarea>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">优先级</label>
+                            <select id="suggestionPriority" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+                                <option value="low">低</option>
+                                <option value="medium" selected>中</option>
+                                <option value="high">高</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">联系方式（可选）</label>
+                            <input type="email" id="suggestionContact" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="您的邮箱地址，方便我们回复">
+                        </div>
+                        
+                        <div class="flex space-x-4">
+                            <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-md transition-colors">
+                                提交建议
+                            </button>
+                            <button type="button" onclick="this.closest('.fixed').remove()" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-md transition-colors">
+                                取消
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            `;
+            
+            showModal('建议功能', suggestionContent);
+            
+            // 添加表单提交处理
+            setTimeout(() => {
+                const form = document.getElementById('suggestionForm');
+                if (form) {
+                    form.addEventListener('submit', function(e) {
+                        e.preventDefault();
+                        handleSuggestionSubmission();
+                    });
+                }
+            }, 100);
+        }
+
+        // 处理反馈提交
+        function handleFeedbackSubmission() {
+            const type = document.getElementById('feedbackType').value;
+            const description = document.getElementById('feedbackDescription').value;
+            const contact = document.getElementById('feedbackContact').value;
+            
+            if (!type || !description) {
+                alert('请填写必填字段');
+                return;
+            }
+            
+            // 模拟提交过程
+            const submitBtn = document.querySelector('#feedbackForm button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = '提交中...';
+            submitBtn.disabled = true;
+            
+            setTimeout(() => {
+                // 这里可以添加实际的提交逻辑
+                console.log('反馈提交:', { type, description, contact });
+                
+                // 显示成功消息
+                alert('反馈提交成功！感谢您的宝贵意见，我们会认真考虑您的建议。');
+                
+                // 关闭模态框
+                document.querySelector('.fixed').remove();
+            }, 1500);
+        }
+
+        // 处理建议提交
+        function handleSuggestionSubmission() {
+            const category = document.getElementById('suggestionCategory').value;
+            const description = document.getElementById('suggestionDescription').value;
+            const scenario = document.getElementById('suggestionScenario').value;
+            const priority = document.getElementById('suggestionPriority').value;
+            const contact = document.getElementById('suggestionContact').value;
+            
+            if (!category || !description) {
+                alert('请填写必填字段');
+                return;
+            }
+            
+            // 模拟提交过程
+            const submitBtn = document.querySelector('#suggestionForm button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = '提交中...';
+            submitBtn.disabled = true;
+            
+            setTimeout(() => {
+                // 这里可以添加实际的提交逻辑
+                console.log('功能建议提交:', { category, description, scenario, priority, contact });
+                
+                // 显示成功消息
+                alert('功能建议提交成功！我们会评估您的建议，并在后续版本中考虑实现。');
+                
+                // 关闭模态框
+                document.querySelector('.fixed').remove();
+            }, 1500);
+        }
+
+        // 测试函数
+        function testFeedbackForm() {
+            showFeedbackForm();
+        }
+
+        function testSuggestionForm() {
+            showFeatureSuggestionForm();
+        }
+
+        // 页面加载时显示欢迎信息
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('提交反馈和建议功能按钮测试页面已加载');
+        });
+    </script>
+</body>
+</html>

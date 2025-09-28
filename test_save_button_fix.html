@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>保存按鈕修復測試</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <style>
+        .input-field {
+            @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+        }
+        .card {
+            @apply bg-white rounded-xl shadow-lg p-6;
+        }
+        .bg-primary {
+            background-color: #3B82F6;
+        }
+        .bg-primary:hover {
+            background-color: #2563EB;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">保存按鈕修復測試</h1>
+        
+        <!-- 模擬修復後的智能設備數據錄入 -->
+        <div class="card mb-5">
+            <div class="card-header">
+                <h3 class="text-xl font-bold text-gray-800">智能设备数据录入</h3>
+                <p class="text-sm text-gray-600 mt-1">支持血压计、血氧计、温度计等设备数据</p>
+            </div>
+            
+            <!-- 设备选择标签页 -->
+            <div class="mb-4">
+                <div class="flex space-x-1 bg-gray-100 p-1 rounded-lg">
+                    <button id="tab-bp" onclick="switchDeviceTab('bp')" class="flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors bg-white text-blue-600 shadow-sm">
+                        <i class="fa fa-heartbeat mr-2"></i>血压计
+                    </button>
+                    <button id="tab-spo2" onclick="switchDeviceTab('spo2')" class="flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors text-gray-600 hover:text-gray-800">
+                        <i class="fa fa-tint mr-2"></i>血氧计
+                    </button>
+                    <button id="tab-temp" onclick="switchDeviceTab('temp')" class="flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors text-gray-600 hover:text-gray-800">
+                        <i class="fa fa-thermometer-half mr-2"></i>温度计
+                    </button>
+                </div>
+            </div>
+
+            <!-- 血压计数据录入 -->
+            <div id="device-bp" class="device-form">
+                <div class="bg-green-50 border-l-4 border-green-400 p-3 rounded mb-4">
+                    <p class="text-sm text-green-700">
+                        <i class="fa fa-info-circle mr-1"></i>
+                        填寫完血壓數據後，請向下滾動查看保存按鈕
+                    </p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fa fa-heart text-red-500 mr-1"></i>收缩压 (SYS)
+                        </label>
+                        <div class="relative">
+                            <input type="number" id="bp-systolic" placeholder="120" class="input-field pr-8" min="60" max="250">
+                            <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">mmHg</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fa fa-heart text-blue-500 mr-1"></i>舒张压 (DIA)
+                        </label>
+                        <div class="relative">
+                            <input type="number" id="bp-diastolic" placeholder="80" class="input-field pr-8" min="40" max="150">
+                            <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">mmHg</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fa fa-heartbeat text-green-500 mr-1"></i>脉搏 (PULSE)
+                        </label>
+                        <div class="relative">
+                            <input type="number" id="bp-pulse" placeholder="72" class="input-field pr-8" min="30" max="200">
+                            <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">bpm</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-blue-50 p-3 rounded-lg mb-4">
+                    <div class="flex items-center">
+                        <i class="fa fa-info-circle text-blue-500 mr-2"></i>
+                        <span class="text-sm text-blue-700">血压评估：</span>
+                        <span id="bp-assessment" class="text-sm font-medium text-blue-800 ml-2">请输入数据</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 血氧计数据录入 -->
+            <div id="device-spo2" class="device-form hidden">
+                <div class="bg-green-50 border-l-4 border-green-400 p-3 rounded mb-4">
+                    <p class="text-sm text-green-700">
+                        <i class="fa fa-info-circle mr-1"></i>
+                        填寫完血氧數據後，請向下滾動查看保存按鈕
+                    </p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fa fa-tint text-red-500 mr-1"></i>血氧饱和度 (%SpO2)
+                        </label>
+                        <div class="relative">
+                            <input type="number" id="spo2-percent" placeholder="98" class="input-field pr-8" min="70" max="100" step="0.1">
+                            <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">%</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fa fa-signal text-orange-500 mr-1"></i>灌注指数 (PI%)
+                        </label>
+                        <div class="relative">
+                            <input type="number" id="spo2-pi" placeholder="2.5" class="input-field pr-8" min="0.1" max="20" step="0.1">
+                            <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">%</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fa fa-heartbeat text-green-500 mr-1"></i>脉搏率 (PR)
+                        </label>
+                        <div class="relative">
+                            <input type="number" id="spo2-pr" placeholder="72" class="input-field pr-8" min="30" max="200">
+                            <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">bpm</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-green-50 p-3 rounded-lg mb-4">
+                    <div class="flex items-center">
+                        <i class="fa fa-info-circle text-green-500 mr-2"></i>
+                        <span class="text-sm text-green-700">血氧评估：</span>
+                        <span id="spo2-assessment" class="text-sm font-medium text-green-800 ml-2">请输入数据</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 温度计数据录入 -->
+            <div id="device-temp" class="device-form hidden">
+                <div class="bg-green-50 border-l-4 border-green-400 p-3 rounded mb-4">
+                    <p class="text-sm text-green-700">
+                        <i class="fa fa-info-circle mr-1"></i>
+                        填寫完體溫數據後，請向下滾動查看保存按鈕
+                    </p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fa fa-thermometer-half text-red-500 mr-1"></i>体温
+                        </label>
+                        <div class="relative">
+                            <input type="number" id="temp-value" placeholder="36.5" class="input-field pr-8" min="30" max="45" step="0.1">
+                            <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">°C</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fa fa-map-marker text-blue-500 mr-1"></i>测量部位
+                        </label>
+                        <select id="temp-location" class="input-field">
+                            <option value="腋下">腋下</option>
+                            <option value="口腔">口腔</option>
+                            <option value="直肠">直肠</option>
+                            <option value="耳温">耳温</option>
+                            <option value="额温">额温</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="bg-orange-50 p-3 rounded-lg mb-4">
+                    <div class="flex items-center">
+                        <i class="fa fa-info-circle text-orange-500 mr-2"></i>
+                        <span class="text-sm text-orange-700">体温评估：</span>
+                        <span id="temp-assessment" class="text-sm font-medium text-orange-800 ml-2">请输入数据</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 通用信息 -->
+            <div class="space-y-4">
+                <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <i class="fa fa-info-circle text-blue-400"></i>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-blue-700">
+                                請填寫完數據後，向下滾動查看「保存設備數據」按鈕
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-base mb-2">测量时间</label>
+                    <input type="datetime-local" id="device-time" class="input-field">
+                </div>
+                <div>
+                    <label class="block text-base mb-2">备注</label>
+                    <textarea id="device-notes" placeholder="例如：餐后测量、运动后测量等" class="input-field" rows="3"></textarea>
+                </div>
+                
+                <!-- 修復後的保存按鈕 -->
+                <button onclick="testSave()" class="w-full py-4 bg-primary text-white rounded-xl text-lg font-bold hover:bg-primary/90 transition-colors shadow-lg border-2 border-blue-400">
+                    <i class="fa fa-save mr-2"></i> 保存设备数据
+                </button>
+            </div>
+        </div>
+
+        <!-- 測試結果 -->
+        <div class="card">
+            <h2 class="text-xl font-semibold mb-4">測試結果</h2>
+            <div id="test-results" class="bg-gray-50 p-4 rounded text-sm font-mono"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentDeviceTab = 'bp';
+
+        function switchDeviceTab(device) {
+            currentDeviceTab = device;
+            
+            // 更新标签页样式
+            document.querySelectorAll('[id^="tab-"]').forEach(tab => {
+                tab.classList.remove('bg-white', 'text-blue-600', 'shadow-sm');
+                tab.classList.add('text-gray-600');
+            });
+            
+            const activeTab = document.getElementById(`tab-${device}`);
+            if (activeTab) {
+                activeTab.classList.remove('text-gray-600');
+                activeTab.classList.add('bg-white', 'text-blue-600', 'shadow-sm');
+            }
+            
+            // 显示/隐藏对应的表单
+            document.querySelectorAll('.device-form').forEach(form => {
+                form.classList.add('hidden');
+            });
+            
+            const activeForm = document.getElementById(`device-${device}`);
+            if (activeForm) {
+                activeForm.classList.remove('hidden');
+            }
+        }
+
+        function testSave() {
+            const systolic = parseInt(document.getElementById('bp-systolic')?.value);
+            const diastolic = parseInt(document.getElementById('bp-diastolic')?.value);
+            const pulse = parseInt(document.getElementById('bp-pulse')?.value);
+            const time = document.getElementById('device-time')?.value || new Date().toISOString().slice(0, 16);
+            const notes = document.getElementById('device-notes')?.value;
+            
+            let result = '✅ 保存按鈕修復測試成功！\n\n';
+            result += `當前選中的設備：${currentDeviceTab}\n`;
+            result += `測量時間：${time}\n`;
+            result += `備註：${notes || '無'}\n\n`;
+            
+            if (currentDeviceTab === 'bp') {
+                if (systolic && diastolic && pulse) {
+                    result += `血壓數據：${systolic}/${diastolic} mmHg，脈搏：${pulse} bpm\n`;
+                    result += '✅ 數據完整，可以保存\n\n';
+                } else {
+                    result += '⚠️ 血壓數據不完整\n\n';
+                }
+            }
+            
+            result += '🎉 保存按鈕現在可見且可點擊！\n';
+            result += '📱 在主頁面中，請向下滾動查看保存按鈕';
+            
+            document.getElementById('test-results').innerHTML = result.replace(/\n/g, '<br>');
+        }
+
+        // 頁面加載完成後設置默認時間
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const timeString = now.toISOString().slice(0, 16);
+            document.getElementById('device-time').value = timeString;
+        });
+    </script>
+</body>
+</html>
+

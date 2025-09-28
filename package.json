@@ -1,0 +1,14 @@
+{
+  "name": "health-app-proxy",
+  "version": "1.0.0",
+  "description": "A proxy server to handle DeepSeek API requests and avoid CORS issues.",
+  "main": "proxy-server.js",
+  "scripts": {
+    "start": "node proxy-server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "axios": "^1.6.2"
+  }
+}

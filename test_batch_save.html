@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>批量保存功能測試</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <style>
+        .input-field {
+            @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+        }
+        .card {
+            @apply bg-white rounded-xl shadow-lg p-6;
+        }
+        .bg-primary {
+            background-color: #3B82F6;
+        }
+        .bg-primary:hover {
+            background-color: #2563EB;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">批量保存功能測試</h1>
+        
+        <!-- 功能說明 -->
+        <div class="card mb-6">
+            <h2 class="text-xl font-semibold mb-4">功能說明</h2>
+            <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <i class="fa fa-info-circle text-blue-400"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm text-blue-700">
+                            <strong>批量保存功能：</strong>可以一次性保存多個設備的數據，避免逐個保存的麻煩
+                        </p>
+                        <ul class="text-sm text-blue-700 mt-2 ml-4 list-disc">
+                            <li>填寫設備數據後，點擊"添加到批量保存"</li>
+                            <li>可以添加多個不同類型的設備數據</li>
+                            <li>最後點擊"批量保存"一次性保存所有數據</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 智能設備數據錄入測試 -->
+        <div class="card mb-6">
+            <h2 class="text-xl font-semibold mb-4">智能設備數據錄入測試</h2>
+            
+            <!-- 设备选择标签页 -->
+            <div class="mb-4">
+                <div class="flex space-x-1 bg-gray-100 p-1 rounded-lg">
+                    <button id="tab-bp" onclick="switchDeviceTab('bp')" class="flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors bg-white text-blue-600 shadow-sm">
+                        <i class="fa fa-heartbeat mr-2"></i>血压计
+                    </button>
+                    <button id="tab-spo2" onclick="switchDeviceTab('spo2')" class="flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors text-gray-600 hover:text-gray-800">
+                        <i class="fa fa-tint mr-2"></i>血氧计
+                    </button>
+                    <button id="tab-temp" onclick="switchDeviceTab('temp')" class="flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors text-gray-600 hover:text-gray-800">
+                        <i class="fa fa-thermometer-half mr-2"></i>温度计
+                    </button>
+                </div>
+            </div>
+
+            <!-- 血压计数据录入 -->
+            <div id="device-bp" class="device-form">
+                <div class="bg-green-50 border-l-4 border-green-400 p-3 rounded mb-4">
+                    <p class="text-sm text-green-700">
+                        <i class="fa fa-info-circle mr-1"></i>
+                        填寫完血壓數據後，可以單獨保存或添加到批量保存
+                    </p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fa fa-heart text-red-500 mr-1"></i>收缩压 (SYS)
+                        </label>
+                        <div class="relative">
+                            <input type="number" id="bp-systolic" placeholder="120" class="input-field pr-8" min="60" max="250">
+                            <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">mmHg</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fa fa-heart text-blue-500 mr-1"></i>舒张压 (DIA)
+                        </label>
+                        <div class="relative">
+                            <input type="number" id="bp-diastolic" placeholder="80" class="input-field pr-8" min="40" max="150">
+                            <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">mmHg</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fa fa-heartbeat text-green-500 mr-1"></i>脉搏 (PULSE)
+                        </label>
+                        <div class="relative">
+                            <input type="number" id="bp-pulse" placeholder="72" class="input-field pr-8" min="30" max="200">
+                            <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">bpm</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-blue-50 p-3 rounded-lg mb-4">
+                    <div class="flex items-center">
+                        <i class="fa fa-info-circle text-blue-500 mr-2"></i>
+                        <span class="text-sm text-blue-700">血压评估：</span>
+                        <span id="bp-assessment" class="text-sm font-medium text-blue-800 ml-2">请输入数据</span>
+                    </div>
+                </div>
+                <button onclick="addToBatchSave('bp')" class="w-full py-2 bg-blue-500 text-white rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors mb-2">
+                    <i class="fa fa-plus mr-2"></i> 添加到批量保存
+                </button>
+            </div>
+
+            <!-- 血氧计数据录入 -->
+            <div id="device-spo2" class="device-form hidden">
+                <div class="bg-green-50 border-l-4 border-green-400 p-3 rounded mb-4">
+                    <p class="text-sm text-green-700">
+                        <i class="fa fa-info-circle mr-1"></i>
+                        填寫完血氧數據後，可以單獨保存或添加到批量保存
+                    </p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fa fa-tint text-red-500 mr-1"></i>血氧饱和度 (%SpO2)
+                        </label>
+                        <div class="relative">
+                            <input type="number" id="spo2-percent" placeholder="98" class="input-field pr-8" min="70" max="100" step="0.1">
+                            <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">%</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fa fa-signal text-orange-500 mr-1"></i>灌注指数 (PI%)
+                        </label>
+                        <div class="relative">
+                            <input type="number" id="spo2-pi" placeholder="2.5" class="input-field pr-8" min="0.1" max="20" step="0.1">
+                            <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">%</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fa fa-heartbeat text-green-500 mr-1"></i>脉搏率 (PR)
+                        </label>
+                        <div class="relative">
+                            <input type="number" id="spo2-pr" placeholder="72" class="input-field pr-8" min="30" max="200">
+                            <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">bpm</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-green-50 p-3 rounded-lg mb-4">
+                    <div class="flex items-center">
+                        <i class="fa fa-info-circle text-green-500 mr-2"></i>
+                        <span class="text-sm text-green-700">血氧评估：</span>
+                        <span id="spo2-assessment" class="text-sm font-medium text-green-800 ml-2">请输入数据</span>
+                    </div>
+                </div>
+                <button onclick="addToBatchSave('spo2')" class="w-full py-2 bg-green-500 text-white rounded-lg text-sm font-medium hover:bg-green-600 transition-colors mb-2">
+                    <i class="fa fa-plus mr-2"></i> 添加到批量保存
+                </button>
+            </div>
+
+            <!-- 温度计数据录入 -->
+            <div id="device-temp" class="device-form hidden">
+                <div class="bg-green-50 border-l-4 border-green-400 p-3 rounded mb-4">
+                    <p class="text-sm text-green-700">
+                        <i class="fa fa-info-circle mr-1"></i>
+                        填寫完體溫數據後，可以單獨保存或添加到批量保存
+                    </p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fa fa-thermometer-half text-red-500 mr-1"></i>体温
+                        </label>
+                        <div class="relative">
+                            <input type="number" id="temp-value" placeholder="36.5" class="input-field pr-8" min="30" max="45" step="0.1">
+                            <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">°C</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fa fa-map-marker text-blue-500 mr-1"></i>测量部位
+                        </label>
+                        <select id="temp-location" class="input-field">
+                            <option value="腋下">腋下</option>
+                            <option value="口腔">口腔</option>
+                            <option value="直肠">直肠</option>
+                            <option value="耳温">耳温</option>
+                            <option value="额温">额温</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="bg-orange-50 p-3 rounded-lg mb-4">
+                    <div class="flex items-center">
+                        <i class="fa fa-info-circle text-orange-500 mr-2"></i>
+                        <span class="text-sm text-orange-700">体温评估：</span>
+                        <span id="temp-assessment" class="text-sm font-medium text-orange-800 ml-2">请输入数据</span>
+                    </div>
+                </div>
+                <button onclick="addToBatchSave('temp')" class="w-full py-2 bg-orange-500 text-white rounded-lg text-sm font-medium hover:bg-orange-600 transition-colors mb-2">
+                    <i class="fa fa-plus mr-2"></i> 添加到批量保存
+                </button>
+            </div>
+
+            <!-- 通用信息 -->
+            <div class="space-y-4">
+                <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <i class="fa fa-info-circle text-blue-400"></i>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-blue-700">
+                                可以單獨保存或使用批量保存功能一次性保存多個設備數據
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-base mb-2">测量时间</label>
+                    <input type="datetime-local" id="device-time" class="input-field">
+                </div>
+                <div>
+                    <label class="block text-base mb-2">备注</label>
+                    <textarea id="device-notes" placeholder="例如：餐后测量、运动后测量等" class="input-field" rows="3"></textarea>
+                </div>
+                
+                <!-- 單獨保存按鈕 -->
+                <button onclick="addDeviceData()" class="w-full py-4 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl text-lg font-bold hover:from-green-600 hover:to-green-700 transition-all duration-300 shadow-xl border-2 border-green-400 transform hover:scale-105">
+                    <i class="fa fa-save mr-2 text-xl"></i> 💾 保存设备数据
+                </button>
+            </div>
+        </div>
+
+        <!-- 批量保存區域 -->
+        <div id="batch-save-area" class="card mb-6 hidden">
+            <div class="bg-purple-50 border-l-4 border-purple-400 p-4 rounded">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h4 class="font-semibold text-purple-800">批量保存列表</h4>
+                        <p class="text-sm text-purple-700">已添加 <span id="batch-count">0</span> 項數據</p>
+                    </div>
+                    <div class="space-x-2">
+                        <button onclick="clearBatchSave()" class="px-3 py-1 bg-gray-500 text-white rounded text-sm hover:bg-gray-600">
+                            <i class="fa fa-trash mr-1"></i>清空
+                        </button>
+                        <button onclick="saveBatchData()" class="px-4 py-2 bg-purple-500 text-white rounded-lg font-medium hover:bg-purple-600">
+                            <i class="fa fa-save mr-2"></i>批量保存
+                        </button>
+                    </div>
+                </div>
+                <div id="batch-items" class="mt-3 space-y-2">
+                    <!-- 批量保存項目將在這裡顯示 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 測試結果 -->
+        <div class="card">
+            <h2 class="text-xl font-semibold mb-4">測試結果</h2>
+            <div class="space-y-4">
+                <button onclick="showStoredData()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                    <i class="fa fa-eye mr-2"></i>查看存儲的數據
+                </button>
+                <button onclick="clearAllData()" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+                    <i class="fa fa-trash mr-2"></i>清除所有數據
+                </button>
+            </div>
+            <div id="test-results" class="mt-4 bg-gray-50 p-4 rounded text-sm font-mono"></div>
+        </div>
+    </div>
+
+    <script>
+        // 設備數據錄入功能
+        let currentDeviceTab = 'bp';
+        let batchSaveData = [];
+
+        function switchDeviceTab(device) {
+            currentDeviceTab = device;
+            
+            // 更新标签页样式
+            document.querySelectorAll('[id^="tab-"]').forEach(tab => {
+                tab.classList.remove('bg-white', 'text-blue-600', 'shadow-sm');
+                tab.classList.add('text-gray-600');
+            });
+            
+            const activeTab = document.getElementById(`tab-${device}`);
+            if (activeTab) {
+                activeTab.classList.remove('text-gray-600');
+                activeTab.classList.add('bg-white', 'text-blue-600', 'shadow-sm');
+            }
+            
+            // 显示/隐藏对应的表单
+            document.querySelectorAll('.device-form').forEach(form => {
+                form.classList.add('hidden');
+            });
+            
+            const activeForm = document.getElementById(`device-${device}`);
+            if (activeForm) {
+                activeForm.classList.remove('hidden');
+            }
+        }
+
+        function addDeviceData() {
+            const time = document.getElementById('device-time')?.value || new Date().toISOString().slice(0, 16);
+            const notes = document.getElementById('device-notes')?.value || '';
+            
+            let deviceData = null;
+            
+            switch (currentDeviceTab) {
+                case 'bp':
+                    deviceData = addBloodPressureData(time, notes);
+                    break;
+                case 'spo2':
+                    deviceData = addSpO2Data(time, notes);
+                    break;
+                case 'temp':
+                    deviceData = addTemperatureData(time, notes);
+                    break;
+            }
+            
+            if (deviceData) {
+                // 保存到本地存储
+                const healthRecords = JSON.parse(localStorage.getItem('healthRecords') || '[]');
+                healthRecords.push(deviceData);
+                localStorage.setItem('healthRecords', JSON.stringify(healthRecords));
+                
+                // 清空表单
+                clearDeviceForm();
+                
+                showMessage('设备数据保存成功！', 'success');
+            }
+        }
+
+        function addToBatchSave(deviceType) {
+            const time = document.getElementById('device-time')?.value || new Date().toISOString().slice(0, 16);
+            const notes = document.getElementById('device-notes')?.value || '';
+            
+            let deviceData = null;
+            
+            switch (deviceType) {
+                case 'bp':
+                    deviceData = addBloodPressureData(time, notes);
+                    break;
+                case 'spo2':
+                    deviceData = addSpO2Data(time, notes);
+                    break;
+                case 'temp':
+                    deviceData = addTemperatureData(time, notes);
+                    break;
+            }
+            
+            if (deviceData) {
+                // 添加到批量保存列表
+                batchSaveData.push(deviceData);
+                updateBatchSaveDisplay();
+                showMessage(`${getDeviceTypeName(deviceType)}數據已添加到批量保存`, 'success');
+            }
+        }
+
+        function getDeviceTypeName(deviceType) {
+            const names = {
+                'bp': '血壓',
+                'spo2': '血氧',
+                'temp': '體溫'
+            };
+            return names[deviceType] || deviceType;
+        }
+
+        function updateBatchSaveDisplay() {
+            const batchArea = document.getElementById('batch-save-area');
+            const batchCount = document.getElementById('batch-count');
+            const batchItems = document.getElementById('batch-items');
+            
+            if (batchSaveData.length > 0) {
+                batchArea.classList.remove('hidden');
+                batchCount.textContent = batchSaveData.length;
+                
+                batchItems.innerHTML = batchSaveData.map((item, index) => `
+                    <div class="flex items-center justify-between bg-white p-2 rounded border">
+                        <div class="flex items-center">
+                            <i class="fa fa-${getDeviceIcon(item.type)} text-${getDeviceColor(item.type)}-500 mr-2"></i>
+                            <span class="text-sm font-medium">${item.type} - ${item.time}</span>
+                        </div>
+                        <button onclick="removeFromBatch(${index})" class="text-red-500 hover:text-red-700">
+                            <i class="fa fa-times"></i>
+                        </button>
+                    </div>
+                `).join('');
+            } else {
+                batchArea.classList.add('hidden');
+            }
+        }
+
+        function getDeviceIcon(type) {
+            const icons = {
+                '血压': 'heartbeat',
+                '血氧': 'tint',
+                '体温': 'thermometer-half'
+            };
+            return icons[type] || 'circle';
+        }
+
+        function getDeviceColor(type) {
+            const colors = {
+                '血压': 'red',
+                '血氧': 'green',
+                '体温': 'orange'
+            };
+            return colors[type] || 'gray';
+        }
+
+        function removeFromBatch(index) {
+            batchSaveData.splice(index, 1);
+            updateBatchSaveDisplay();
+        }
+
+        function clearBatchSave() {
+            batchSaveData = [];
+            updateBatchSaveDisplay();
+            showMessage('批量保存列表已清空', 'info');
+        }
+
+        function saveBatchData() {
+            if (batchSaveData.length === 0) {
+                showMessage('批量保存列表為空', 'error');
+                return;
+            }
+            
+            try {
+                const savedCount = batchSaveData.length;
+                
+                // 保存所有數據到本地存儲
+                const healthRecords = JSON.parse(localStorage.getItem('healthRecords') || '[]');
+                healthRecords.push(...batchSaveData);
+                localStorage.setItem('healthRecords', JSON.stringify(healthRecords));
+                
+                // 清空批量保存列表
+                batchSaveData = [];
+                updateBatchSaveDisplay();
+                
+                // 清空表單
+                clearDeviceForm();
+                
+                showMessage(`成功批量保存 ${savedCount} 項設備數據`, 'success');
+            } catch (error) {
+                console.error('批量保存失敗:', error);
+                showMessage('批量保存失敗: ' + error.message, 'error');
+            }
+        }
+
+        function addBloodPressureData(time, notes) {
+            const systolic = parseInt(document.getElementById('bp-systolic')?.value);
+            const diastolic = parseInt(document.getElementById('bp-diastolic')?.value);
+            const pulse = parseInt(document.getElementById('bp-pulse')?.value);
+            
+            if (!systolic || !diastolic || !pulse) {
+                showMessage('请填写完整的血压数据', 'error');
+                return null;
+            }
+            
+            const assessment = assessBloodPressure(systolic, diastolic);
+            
+            return {
+                id: Date.now(),
+                type: '血压',
+                device: '血压计',
+                time: time,
+                notes: notes,
+                timestamp: new Date().toISOString(),
+                data: {
+                    systolic: systolic,
+                    diastolic: diastolic,
+                    pulse: pulse,
+                    assessment: assessment
+                }
+            };
+        }
+
+        function addSpO2Data(time, notes) {
+            const percent = parseFloat(document.getElementById('spo2-percent')?.value);
+            const pi = parseFloat(document.getElementById('spo2-pi')?.value);
+            const pr = parseInt(document.getElementById('spo2-pr')?.value);
+            
+            if (!percent || !pi || !pr) {
+                showMessage('请填写完整的血氧数据', 'error');
+                return null;
+            }
+            
+            const assessment = assessSpO2(percent, pi);
+            
+            return {
+                id: Date.now(),
+                type: '血氧',
+                device: '血氧计',
+                time: time,
+                notes: notes,
+                timestamp: new Date().toISOString(),
+                data: {
+                    percent: percent,
+                    pi: pi,
+                    pr: pr,
+                    assessment: assessment
+                }
+            };
+        }
+
+        function addTemperatureData(time, notes) {
+            const value = parseFloat(document.getElementById('temp-value')?.value);
+            const location = document.getElementById('temp-location')?.value;
+            
+            if (!value || !location) {
+                showMessage('请填写完整的体温数据', 'error');
+                return null;
+            }
+            
+            const assessment = assessTemperature(value, location);
+            
+            return {
+                id: Date.now(),
+                type: '体温',
+                device: '温度计',
+                time: time,
+                notes: notes,
+                timestamp: new Date().toISOString(),
+                data: {
+                    value: value,
+                    location: location,
+                    assessment: assessment
+                }
+            };
+        }
+
+        function assessBloodPressure(systolic, diastolic) {
+            if (systolic < 120 && diastolic < 80) {
+                return { level: '正常', advice: '血压正常，请保持良好生活习惯' };
+            } else if (systolic < 140 && diastolic < 90) {
+                return { level: '正常高值', advice: '血压偏高，建议控制饮食和适量运动' };
+            } else {
+                return { level: '高血压', advice: '血压偏高，建议咨询医生' };
+            }
+        }
+
+        function assessSpO2(percent, pi) {
+            if (percent >= 95) {
+                return { level: '正常', advice: '血氧饱和度正常' };
+            } else if (percent >= 90) {
+                return { level: '偏低', advice: '血氧饱和度偏低，建议观察' };
+            } else {
+                return { level: '严重偏低', advice: '血氧饱和度严重偏低，建议立即就医' };
+            }
+        }
+
+        function assessTemperature(value, location) {
+            let normalRange = { min: 36.0, max: 37.2 };
+            
+            if (location === '口腔') {
+                normalRange = { min: 36.3, max: 37.2 };
+            } else if (location === '直肠') {
+                normalRange = { min: 36.6, max: 37.6 };
+            } else if (location === '耳温') {
+                normalRange = { min: 36.1, max: 37.1 };
+            }
+            
+            if (value >= normalRange.min && value <= normalRange.max) {
+                return { level: '正常', advice: '体温正常' };
+            } else if (value > normalRange.max) {
+                return { level: '偏高', advice: '体温偏高，建议休息并观察' };
+            } else {
+                return { level: '偏低', advice: '体温偏低，注意保暖' };
+            }
+        }
+
+        function clearDeviceForm() {
+            // 清空当前设备表单
+            const currentForm = document.getElementById(`device-${currentDeviceTab}`);
+            if (currentForm) {
+                const inputs = currentForm.querySelectorAll('input, select, textarea');
+                inputs.forEach(input => {
+                    if (input.type === 'checkbox' || input.type === 'radio') {
+                        input.checked = false;
+                    } else {
+                        input.value = '';
+                    }
+                });
+            }
+            
+            // 清空通用信息
+            document.getElementById('device-time').value = '';
+            document.getElementById('device-notes').value = '';
+        }
+
+        function showStoredData() {
+            const healthRecords = JSON.parse(localStorage.getItem('healthRecords') || '[]');
+            const deviceRecords = healthRecords.filter(record => record.device);
+            
+            let result = `<strong>存儲的數據：</strong><br>`;
+            result += `總記錄數：${healthRecords.length}<br>`;
+            result += `設備記錄數：${deviceRecords.length}<br><br>`;
+            
+            if (deviceRecords.length > 0) {
+                result += `<strong>設備記錄詳情：</strong><br>`;
+                deviceRecords.forEach((record, index) => {
+                    result += `${index + 1}. ${record.type} - ${record.time}<br>`;
+                    if (record.type === '血压') {
+                        result += `   收縮壓：${record.data.systolic} mmHg<br>`;
+                        result += `   舒張壓：${record.data.diastolic} mmHg<br>`;
+                        result += `   脈搏：${record.data.pulse} bpm<br>`;
+                    } else if (record.type === '血氧') {
+                        result += `   血氧飽和度：${record.data.percent}%<br>`;
+                        result += `   灌注指數：${record.data.pi}%<br>`;
+                        result += `   脈搏率：${record.data.pr} bpm<br>`;
+                    } else if (record.type === '体温') {
+                        result += `   體溫：${record.data.value}°C<br>`;
+                        result += `   測量部位：${record.data.location}<br>`;
+                    }
+                    result += `   評估：${record.data.assessment.level} - ${record.data.assessment.advice}<br><br>`;
+                });
+            } else {
+                result += `沒有設備記錄數據`;
+            }
+            
+            document.getElementById('test-results').innerHTML = result;
+        }
+
+        function clearAllData() {
+            if (confirm('確定要清除所有數據嗎？')) {
+                localStorage.removeItem('healthRecords');
+                batchSaveData = [];
+                updateBatchSaveDisplay();
+                showMessage('所有數據已清除', 'info');
+                document.getElementById('test-results').innerHTML = '';
+            }
+        }
+
+        function showMessage(message, type) {
+            const colors = {
+                success: 'green',
+                error: 'red',
+                info: 'blue'
+            };
+            
+            const resultDiv = document.getElementById('test-results');
+            resultDiv.innerHTML = `<div class="text-${colors[type]}-600 font-medium">${message}</div>`;
+            
+            setTimeout(() => {
+                resultDiv.innerHTML = '';
+            }, 3000);
+        }
+
+        // 頁面加載完成後設置默認時間
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const timeString = now.toISOString().slice(0, 16);
+            document.getElementById('device-time').value = timeString;
+        });
+    </script>
+</body>
+</html>

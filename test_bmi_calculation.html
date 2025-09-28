@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BMI自动计算功能测试</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">BMI自动计算功能测试</h1>
+        
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">BMI计算器</h2>
+            <form class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">身高 (cm)</label>
+                        <input type="number" id="test-height" placeholder="例如：170" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" oninput="calculateTestBMI()">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">体重 (kg)</label>
+                        <input type="number" id="test-weight" placeholder="例如：65" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" oninput="calculateTestBMI()">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">BMI (自动计算)</label>
+                    <input type="number" id="test-bmi" placeholder="将自动计算" class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50" readonly>
+                    <div id="test-bmi-category" class="text-sm mt-1"></div>
+                </div>
+            </form>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">测试按钮</h2>
+            <div class="space-x-4">
+                <button onclick="testBMICalculation()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
+                    测试BMI计算
+                </button>
+                <button onclick="testBMICategories()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">
+                    测试BMI分类
+                </button>
+                <button onclick="fillSampleData()" class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded">
+                    填充示例数据
+                </button>
+            </div>
+        </div>
+
+        <div id="test-results" class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">测试结果</h2>
+            <div id="results-content" class="text-gray-600">
+                输入身高和体重，或点击测试按钮...
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * 获取BMI分类
+         */
+        function getBMICategory(bmi) {
+            if (!bmi) return '未计算';
+            const bmiValue = parseFloat(bmi);
+            if (bmiValue < 18.5) return '偏瘦';
+            if (bmiValue < 24) return '正常';
+            if (bmiValue < 28) return '偏胖';
+            return '肥胖';
+        }
+
+        /**
+         * BMI自动计算函数
+         */
+        function calculateTestBMI() {
+            const height = parseFloat(document.getElementById('test-height')?.value);
+            const weight = parseFloat(document.getElementById('test-weight')?.value);
+            const bmiInput = document.getElementById('test-bmi');
+            const bmiCategory = document.getElementById('test-bmi-category');
+            
+            if (height && weight && height > 0 && weight > 0) {
+                // BMI = 体重(kg) / 身高(m)²
+                const heightInMeters = height / 100;
+                const bmi = weight / (heightInMeters * heightInMeters);
+                
+                // 设置BMI值（保留1位小数）
+                bmiInput.value = bmi.toFixed(1);
+                
+                // 显示BMI分类
+                const category = getBMICategory(bmi);
+                let categoryColor = '';
+                
+                if (bmi < 18.5) {
+                    categoryColor = 'text-blue-600';
+                } else if (bmi < 24) {
+                    categoryColor = 'text-green-600';
+                } else if (bmi < 28) {
+                    categoryColor = 'text-yellow-600';
+                } else {
+                    categoryColor = 'text-red-600';
+                }
+                
+                bmiCategory.innerHTML = `<span class="${categoryColor} font-medium">BMI分类: ${category}</span>`;
+            } else {
+                bmiInput.value = '';
+                bmiCategory.innerHTML = '';
+            }
+        }
+
+        /**
+         * 测试BMI计算
+         */
+        function testBMICalculation() {
+            const resultsDiv = document.getElementById('results-content');
+            
+            const testCases = [
+                { height: 170, weight: 65, expected: 22.5 },
+                { height: 175, weight: 80, expected: 26.1 },
+                { height: 160, weight: 50, expected: 19.5 },
+                { height: 180, weight: 90, expected: 27.8 }
+            ];
+
+            let results = '<div class="space-y-3">';
+            
+            testCases.forEach((testCase, index) => {
+                const heightInMeters = testCase.height / 100;
+                const calculatedBMI = testCase.weight / (heightInMeters * heightInMeters);
+                const isCorrect = Math.abs(calculatedBMI - testCase.expected) < 0.1;
+                
+                results += `
+                    <div class="border rounded p-3">
+                        <h4 class="font-medium mb-2">测试案例 ${index + 1}</h4>
+                        <p class="text-sm">身高: ${testCase.height}cm, 体重: ${testCase.weight}kg</p>
+                        <p class="text-sm">计算BMI: ${calculatedBMI.toFixed(1)}, 期望: ${testCase.expected}</p>
+                        <p class="text-sm ${isCorrect ? 'text-green-600' : 'text-red-600'}">
+                            ${isCorrect ? '✅ 计算正确' : '❌ 计算错误'}
+                        </p>
+                    </div>
+                `;
+            });
+            
+            results += '</div>';
+            resultsDiv.innerHTML = results;
+        }
+
+        /**
+         * 测试BMI分类
+         */
+        function testBMICategories() {
+            const resultsDiv = document.getElementById('results-content');
+            
+            const testCases = [
+                { bmi: 17.5, expected: '偏瘦' },
+                { bmi: 22.0, expected: '正常' },
+                { bmi: 25.5, expected: '偏胖' },
+                { bmi: 30.0, expected: '肥胖' }
+            ];
+
+            let results = '<div class="space-y-3">';
+            
+            testCases.forEach((testCase, index) => {
+                const category = getBMICategory(testCase.bmi);
+                const isCorrect = category === testCase.expected;
+                
+                results += `
+                    <div class="border rounded p-3">
+                        <h4 class="font-medium mb-2">测试案例 ${index + 1}</h4>
+                        <p class="text-sm">BMI: ${testCase.bmi}</p>
+                        <p class="text-sm">分类: ${category}, 期望: ${testCase.expected}</p>
+                        <p class="text-sm ${isCorrect ? 'text-green-600' : 'text-red-600'}">
+                            ${isCorrect ? '✅ 分类正确' : '❌ 分类错误'}
+                        </p>
+                    </div>
+                `;
+            });
+            
+            results += '</div>';
+            resultsDiv.innerHTML = results;
+        }
+
+        /**
+         * 填充示例数据
+         */
+        function fillSampleData() {
+            document.getElementById('test-height').value = '170';
+            document.getElementById('test-weight').value = '65';
+            calculateTestBMI();
+            
+            const resultsDiv = document.getElementById('results-content');
+            resultsDiv.innerHTML = `
+                <div class="text-blue-600">
+                    <h3 class="font-semibold mb-2">📝 示例数据已填充</h3>
+                    <p>身高: 170cm, 体重: 65kg</p>
+                    <p class="text-sm mt-2">BMI将自动计算并显示分类</p>
+                </div>
+            `;
+        }
+
+        // 页面加载时显示欢迎信息
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('BMI自动计算功能测试页面已加载');
+        });
+    </script>
+</body>
+</html>

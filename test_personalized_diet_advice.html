@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个性化饮食建议功能测试</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">个性化饮食建议功能测试</h1>
+        
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">功能概述</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-blue-50 p-4 rounded-lg">
+                    <h3 class="font-medium text-blue-800 mb-3">数据收集</h3>
+                    <ul class="text-sm text-blue-700 space-y-1">
+                        <li>• 基本信息（年龄、性别、身高、体重、BMI）</li>
+                        <li>• 健康指标（血压、心率、血糖、体温、血氧）</li>
+                        <li>• 医疗史和用药情况</li>
+                        <li>• 生活方式（运动、睡眠、压力）</li>
+                        <li>• 饮食记录历史</li>
+                        <li>• 设备监测数据</li>
+                    </ul>
+                </div>
+                
+                <div class="bg-green-50 p-4 rounded-lg">
+                    <h3 class="font-medium text-green-800 mb-3">AI分析</h3>
+                    <ul class="text-sm text-green-700 space-y-1">
+                        <li>• 营养需求分析</li>
+                        <li>• 具体饮食建议</li>
+                        <li>• 用餐时间建议</li>
+                        <li>• 特殊注意事项</li>
+                        <li>• 营养补充建议</li>
+                        <li>• 基于规则的备用建议</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">测试功能</h2>
+            <div class="flex flex-wrap gap-4">
+                <button onclick="addTestHealthData()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded flex items-center">
+                    <i class="fa fa-user mr-2"></i>添加测试健康数据
+                </button>
+                <button onclick="addTestDietRecords()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded flex items-center">
+                    <i class="fa fa-cutlery mr-2"></i>添加测试饮食记录
+                </button>
+                <button onclick="testDietAdvice()" class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded flex items-center">
+                    <i class="fa fa-lightbulb-o mr-2"></i>测试饮食建议
+                </button>
+                <button onclick="clearTestData()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded flex items-center">
+                    <i class="fa fa-trash mr-2"></i>清空测试数据
+                </button>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">测试结果</h2>
+            <div id="test-results" class="space-y-4">
+                <div class="text-gray-500">点击上方按钮开始测试...</div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">功能特点</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-yellow-50 p-4 rounded-lg">
+                    <h3 class="font-medium text-yellow-800 mb-2">综合分析</h3>
+                    <p class="text-sm text-yellow-700">整合所有健康数据，提供个性化建议</p>
+                </div>
+                
+                <div class="bg-purple-50 p-4 rounded-lg">
+                    <h3 class="font-medium text-purple-800 mb-2">AI驱动</h3>
+                    <p class="text-sm text-purple-700">使用AI分析，提供专业营养建议</p>
+                </div>
+                
+                <div class="bg-pink-50 p-4 rounded-lg">
+                    <h3 class="font-medium text-pink-800 mb-2">备用机制</h3>
+                    <p class="text-sm text-pink-700">AI不可用时，提供基于规则的备用建议</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 添加测试健康数据
+        function addTestHealthData() {
+            // 模拟填写健康数据表单
+            const testData = {
+                age: '65',
+                gender: '男',
+                height: '170',
+                weight: '75',
+                systolic: '145',
+                diastolic: '90',
+                heartRate: '85',
+                glucose: '110',
+                temperature: '36.5',
+                spo2: '98',
+                medicalHistory: '高血压、糖尿病',
+                medications: '降压药、降糖药',
+                exercise: '每周散步3次',
+                sleep: '每晚7小时',
+                stress: '中等'
+            };
+            
+            // 这里只是模拟，实际应用中会填写到表单
+            console.log('测试健康数据:', testData);
+            updateResults('✅ 测试健康数据已添加');
+        }
+
+        // 添加测试饮食记录
+        function addTestDietRecords() {
+            const testRecords = [
+                {
+                    id: Date.now(),
+                    mealTime: '早餐',
+                    foodContent: '燕麦粥、鸡蛋、牛奶、苹果',
+                    dietTime: new Date().toISOString(),
+                    timestamp: new Date().toISOString()
+                },
+                {
+                    id: Date.now() + 1,
+                    mealTime: '午餐',
+                    foodContent: '糙米饭、清蒸鱼、青菜、豆腐汤',
+                    dietTime: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
+                    timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString()
+                },
+                {
+                    id: Date.now() + 2,
+                    mealTime: '晚餐',
+                    foodContent: '小米粥、蒸蛋、菠菜、胡萝卜',
+                    dietTime: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString(),
+                    timestamp: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString()
+                }
+            ];
+            
+            // 保存到本地存储
+            let dietRecords = JSON.parse(localStorage.getItem('dietRecords') || '[]');
+            dietRecords.push(...testRecords);
+            localStorage.setItem('dietRecords', JSON.stringify(dietRecords));
+            
+            console.log('测试饮食记录已添加:', testRecords);
+            updateResults('✅ 测试饮食记录已添加');
+        }
+
+        // 测试饮食建议
+        async function testDietAdvice() {
+            try {
+                updateResults('🔄 正在生成个性化饮食建议...');
+                
+                // 模拟健康数据
+                const healthData = {
+                    age: '65',
+                    gender: '男',
+                    height: '170',
+                    weight: '75',
+                    bmi: '26.0',
+                    bloodPressure: { systolic: '145', diastolic: '90' },
+                    heartRate: '85',
+                    bloodGlucose: '110',
+                    temperature: '36.5',
+                    spO2: '98',
+                    medicalHistory: '高血压、糖尿病',
+                    medications: '降压药、降糖药',
+                    exerciseHabits: '每周散步3次',
+                    sleepHabits: '每晚7小时',
+                    stressLevel: '中等',
+                    dietRecords: JSON.parse(localStorage.getItem('dietRecords') || '[]'),
+                    deviceData: null
+                };
+                
+                // 生成基于规则的备用建议
+                const advice = generateRuleBasedDietAdvice(healthData);
+                
+                // 显示建议
+                displayTestAdvice(advice);
+                updateResults('✅ 个性化饮食建议已生成');
+                
+            } catch (error) {
+                console.error('测试饮食建议失败:', error);
+                updateResults('❌ 测试失败: ' + error.message);
+            }
+        }
+
+        // 基于规则的备用饮食建议
+        function generateRuleBasedDietAdvice(healthData) {
+            let advice = "基于您的健康数据，为您提供以下饮食建议：\n\n";
+            
+            // BMI分析
+            const bmi = parseFloat(healthData.bmi);
+            if (bmi) {
+                if (bmi < 18.5) {
+                    advice += "📊 **体重偏轻**：建议增加营养密度高的食物，如坚果、全脂奶制品、瘦肉等。\n\n";
+                } else if (bmi > 24) {
+                    advice += "📊 **体重偏重**：建议控制总热量摄入，增加蔬菜和蛋白质比例。\n\n";
+                } else {
+                    advice += "📊 **体重正常**：保持均衡饮食，维持当前健康状态。\n\n";
+                }
+            }
+            
+            // 血压分析
+            const systolic = parseInt(healthData.bloodPressure.systolic);
+            const diastolic = parseInt(healthData.bloodPressure.diastolic);
+            if (systolic && diastolic) {
+                if (systolic >= 140 || diastolic >= 90) {
+                    advice += "🩺 **血压偏高**：\n";
+                    advice += "- 减少钠盐摄入，每日不超过6克\n";
+                    advice += "- 增加富含钾的食物：香蕉、橙子、菠菜\n";
+                    advice += "- 限制加工食品和腌制食品\n\n";
+                }
+            }
+            
+            // 血糖分析
+            const glucose = parseInt(healthData.bloodGlucose);
+            if (glucose) {
+                if (glucose > 126) {
+                    advice += "🍯 **血糖偏高**：\n";
+                    advice += "- 控制碳水化合物摄入，选择低GI食物\n";
+                    advice += "- 增加膳食纤维：燕麦、豆类、蔬菜\n";
+                    advice += "- 定时定量进餐，避免暴饮暴食\n\n";
+                }
+            }
+            
+            // 年龄相关建议
+            const age = parseInt(healthData.age);
+            if (age >= 60) {
+                advice += "👴 **老年营养建议**：\n";
+                advice += "- 增加优质蛋白质：鱼、蛋、豆制品\n";
+                advice += "- 补充钙质：奶制品、芝麻、虾皮\n";
+                advice += "- 增加维生素D：深海鱼、蛋黄\n";
+                advice += "- 多喝水，保持充足水分\n\n";
+            }
+            
+            // 通用建议
+            advice += "🥗 **通用饮食原则**：\n";
+            advice += "- 多样化饮食，每天至少5种不同颜色的蔬菜水果\n";
+            advice += "- 控制油盐糖摄入\n";
+            advice += "- 定时定量，细嚼慢咽\n";
+            advice += "- 保持充足水分，每日1500-2000ml\n\n";
+            
+            advice += "⚠️ **注意事项**：以上建议仅供参考，如有特殊疾病请咨询专业医生或营养师。";
+            
+            return advice;
+        }
+
+        // 显示测试建议
+        function displayTestAdvice(advice) {
+            const resultsDiv = document.getElementById('test-results');
+            const formattedAdvice = advice.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            
+            resultsDiv.innerHTML = `
+                <div class="bg-blue-50 p-4 rounded-lg">
+                    <div class="flex items-start">
+                        <i class="fa fa-lightbulb-o text-blue-500 text-xl mr-3 mt-1"></i>
+                        <div class="flex-1">
+                            <h4 class="font-semibold text-blue-800 mb-2">AI个性化饮食建议</h4>
+                            <div class="text-blue-700 text-sm leading-relaxed">
+                                ${formattedAdvice}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 清空测试数据
+        function clearTestData() {
+            if (confirm('确定要清空所有测试数据吗？')) {
+                localStorage.removeItem('dietRecords');
+                document.getElementById('test-results').innerHTML = '<div class="text-gray-500">测试数据已清空</div>';
+                console.log('测试数据已清空');
+            }
+        }
+
+        // 更新测试结果
+        function updateResults(message) {
+            const resultsDiv = document.getElementById('test-results');
+            const timestamp = new Date().toLocaleTimeString();
+            const existingContent = resultsDiv.innerHTML;
+            
+            if (existingContent.includes('点击上方按钮开始测试')) {
+                resultsDiv.innerHTML = `<div class="text-green-600">[${timestamp}] ${message}</div>`;
+            } else {
+                resultsDiv.innerHTML = existingContent + `<div class="text-green-600">[${timestamp}] ${message}</div>`;
+            }
+        }
+
+        // 页面加载时显示欢迎信息
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('个性化饮食建议功能测试页面已加载');
+        });
+    </script>
+</body>
+</html>

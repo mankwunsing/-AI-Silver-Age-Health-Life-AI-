@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>專業級數據可視化測試</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+    <script src="https://cdn.jsdelivr.net/npm/date-fns@2.29.3/date-fns.min.js"></script>
+    <script src="professional_visualization.js"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-3xl font-bold text-gray-800 mb-8">專業級數據可視化測試</h1>
+        
+        <!-- 測試數據生成 -->
+        <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+            <h2 class="text-xl font-semibold mb-4">測試數據生成</h2>
+            <div class="flex space-x-4">
+                <button onclick="generateTestData()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                    生成測試數據
+                </button>
+                <button onclick="updateAllCharts()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+                    更新所有圖表
+                </button>
+                <button onclick="clearAllCharts()" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
+                    清除所有圖表
+                </button>
+            </div>
+        </div>
+
+        <!-- 圖表展示區域 -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- 雙軸趨勢圖表 -->
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h3 class="text-lg font-semibold mb-4">雙軸趨勢分析圖表</h3>
+                <div class="h-80">
+                    <canvas id="dual-axis-chart"></canvas>
+                </div>
+            </div>
+
+            <!-- 血氧飽和度面積圖 -->
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h3 class="text-lg font-semibold mb-4">血氧飽和度面積圖</h3>
+                <div class="h-80">
+                    <canvas id="blood-oxygen-chart"></canvas>
+                </div>
+            </div>
+
+            <!-- 體溫柱狀圖 -->
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h3 class="text-lg font-semibold mb-4">體溫柱狀圖</h3>
+                <div class="h-80">
+                    <canvas id="temperature-chart"></canvas>
+                </div>
+            </div>
+
+            <!-- 相關性熱力圖 -->
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h3 class="text-lg font-semibold mb-4">相關性熱力圖</h3>
+                <div class="h-80">
+                    <canvas id="correlation-chart"></canvas>
+                </div>
+            </div>
+
+            <!-- 堆疊條形圖 -->
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h3 class="text-lg font-semibold mb-4">堆疊條形圖</h3>
+                <div class="h-80">
+                    <canvas id="stacked-bar-chart"></canvas>
+                </div>
+            </div>
+
+            <!-- 風險分層餅圖 -->
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h3 class="text-lg font-semibold mb-4">風險分層餅圖</h3>
+                <div class="h-80">
+                    <canvas id="risk-stratification-chart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 初始化專業可視化系統
+        const professionalViz = new ProfessionalVisualization();
+        let testData = [];
+
+        /**
+         * 生成測試數據
+         */
+        function generateTestData() {
+            testData = [];
+            const now = new Date();
+            
+            // 生成7天的測試數據
+            for (let i = 6; i >= 0; i--) {
+                const date = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
+                
+                // 生成血壓數據（正常範圍內波動）
+                const systolic = 110 + Math.random() * 20; // 110-130
+                const diastolic = 70 + Math.random() * 15; // 70-85
+                const pulse = 65 + Math.random() * 20; // 65-85
+                
+                // 生成血氧數據
+                const spo2 = 95 + Math.random() * 4; // 95-99
+                const pi = 0.5 + Math.random() * 2; // 0.5-2.5
+                
+                // 生成體溫數據
+                const temperature = 36.0 + Math.random() * 1.5; // 36.0-37.5
+                
+                testData.push({
+                    timestamp: date.toISOString(),
+                    bloodPressure: {
+                        systolic: Math.round(systolic),
+                        diastolic: Math.round(diastolic),
+                        pulse: Math.round(pulse)
+                    },
+                    spO2: {
+                        percent: Math.round(spo2),
+                        pi: Math.round(pi * 10) / 10,
+                        pr: Math.round(pulse)
+                    },
+                    temperature: {
+                        value: Math.round(temperature * 10) / 10,
+                        location: '腋下'
+                    }
+                });
+            }
+            
+            console.log('生成的測試數據:', testData);
+            updateAllCharts();
+        }
+
+        /**
+         * 更新所有圖表
+         */
+        function updateAllCharts() {
+            if (testData.length === 0) {
+                alert('請先生成測試數據');
+                return;
+            }
+            
+            try {
+                // 雙軸趨勢圖表
+                professionalViz.createDualAxisTrendChart('dual-axis-chart', testData);
+                
+                // 血氧飽和度面積圖
+                professionalViz.createBloodOxygenAreaChart('blood-oxygen-chart', testData);
+                
+                // 體溫柱狀圖
+                professionalViz.createTemperatureBarChart('temperature-chart', testData);
+                
+                // 相關性熱力圖
+                professionalViz.createCorrelationHeatmap('correlation-chart', testData);
+                
+                // 堆疊條形圖
+                professionalViz.createStackedBarChart('stacked-bar-chart', testData);
+                
+                // 風險分層餅圖
+                professionalViz.createRiskStratificationPieChart('risk-stratification-chart', testData);
+                
+                console.log('所有圖表已更新');
+            } catch (error) {
+                console.error('更新圖表失敗:', error);
+                alert('更新圖表失敗: ' + error.message);
+            }
+        }
+
+        /**
+         * 清除所有圖表
+         */
+        function clearAllCharts() {
+            professionalViz.destroyAllCharts();
+            testData = [];
+            console.log('所有圖表已清除');
+        }
+
+        // 頁面加載時自動生成測試數據
+        window.addEventListener('load', function() {
+            generateTestData();
+        });
+    </script>
+</body>
+</html>

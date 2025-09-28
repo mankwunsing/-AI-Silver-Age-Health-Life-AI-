@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>健康報告修復指南</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <style>
+        .card {
+            @apply bg-white rounded-xl shadow-lg p-6;
+        }
+        .bg-primary {
+            background-color: #3B82F6;
+        }
+        .bg-success {
+            background-color: #10B981;
+        }
+        .bg-warning {
+            background-color: #F59E0B;
+        }
+        .bg-error {
+            background-color: #EF4444;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">健康報告修復指南</h1>
+        
+        <!-- 問題診斷 -->
+        <div class="card mb-6">
+            <h2 class="text-xl font-semibold mb-4 text-error">問題診斷</h2>
+            <div class="bg-red-50 border-l-4 border-red-400 p-4 rounded">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <i class="fa fa-exclamation-triangle text-red-400"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm text-red-700">
+                            <strong>錯誤信息：</strong>生成健康报告失败: Failed to fetch
+                        </p>
+                        <p class="text-sm text-red-700 mt-1">
+                            <strong>原因：</strong>健康報告功能直接調用 DeepSeek API，沒有通過代理服務器，導致 CORS 錯誤
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 修復方案 -->
+        <div class="card mb-6">
+            <h2 class="text-xl font-semibold mb-4 text-success">修復方案</h2>
+            <div class="space-y-4">
+                <div class="bg-green-50 border-l-4 border-green-400 p-4 rounded">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <i class="fa fa-check-circle text-green-400"></i>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-green-700">
+                                <strong>✅ 已修復：</strong>將健康報告的 API 調用改為通過代理服務器
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <i class="fa fa-info-circle text-blue-400"></i>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-blue-700">
+                                <strong>🔧 技術細節：</strong>
+                            </p>
+                            <ul class="text-sm text-blue-700 mt-2 ml-4 list-disc">
+                                <li>API 端點從 <code>https://api.deepseek.com/v1/chat/completions</code> 改為 <code>http://localhost:3000/api/chat</code></li>
+                                <li>改進了錯誤處理，提供更詳細的錯誤信息</li>
+                                <li>添加了網絡連接檢查</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 使用步驟 -->
+        <div class="card mb-6">
+            <h2 class="text-xl font-semibold mb-4 text-primary">使用步驟</h2>
+            <div class="space-y-4">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0 w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-bold">1</div>
+                    <div class="ml-4">
+                        <h3 class="font-semibold text-gray-800">確保代理服務器運行</h3>
+                        <p class="text-sm text-gray-600 mt-1">在項目目錄中運行 <code>npm start</code></p>
+                    </div>
+                </div>
+                
+                <div class="flex items-start">
+                    <div class="flex-shrink-0 w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-bold">2</div>
+                    <div class="ml-4">
+                        <h3 class="font-semibold text-gray-800">錄入健康數據</h3>
+                        <p class="text-sm text-gray-600 mt-1">在智能設備數據錄入區域填寫血壓、血氧或體溫數據</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-start">
+                    <div class="flex-shrink-0 w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-bold">3</div>
+                    <div class="ml-4">
+                        <h3 class="font-semibold text-gray-800">生成健康報告</h3>
+                        <p class="text-sm text-gray-600 mt-1">點擊"生成報告"按鈕，等待 AI 分析完成</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 測試工具 -->
+        <div class="card mb-6">
+            <h2 class="text-xl font-semibold mb-4 text-warning">測試工具</h2>
+            <div class="space-y-4">
+                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <i class="fa fa-flask text-yellow-400"></i>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-yellow-700">
+                                <strong>🧪 測試頁面：</strong>
+                            </p>
+                            <ul class="text-sm text-yellow-700 mt-2 ml-4 list-disc">
+                                <li><a href="test_health_report_fix.html" class="underline hover:no-underline">健康報告修復測試</a> - 完整的測試和診斷工具</li>
+                                <li><a href="test_device_data_entry.html" class="underline hover:no-underline">智能設備數據錄入測試</a> - 測試數據錄入功能</li>
+                                <li><a href="diagnose_device_entry.html" class="underline hover:no-underline">診斷工具</a> - 診斷各種問題</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 常見問題 -->
+        <div class="card mb-6">
+            <h2 class="text-xl font-semibold mb-4">常見問題</h2>
+            <div class="space-y-4">
+                <div class="border-l-4 border-gray-300 pl-4">
+                    <h3 class="font-semibold text-gray-800">Q: 仍然出現 "Failed to fetch" 錯誤</h3>
+                    <p class="text-sm text-gray-600 mt-1">A: 請確保代理服務器正在運行，在終端中運行 <code>npm start</code></p>
+                </div>
+                
+                <div class="border-l-4 border-gray-300 pl-4">
+                    <h3 class="font-semibold text-gray-800">Q: 健康報告生成很慢</h3>
+                    <p class="text-sm text-gray-600 mt-1">A: 這是正常的，AI 需要時間分析數據。請耐心等待。</p>
+                </div>
+                
+                <div class="border-l-4 border-gray-300 pl-4">
+                    <h3 class="font-semibold text-gray-800">Q: 沒有健康數據時能生成報告嗎？</h3>
+                    <p class="text-sm text-gray-600 mt-1">A: 可以，但建議先錄入一些健康數據以獲得更有價值的分析。</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 狀態檢查 -->
+        <div class="card">
+            <h2 class="text-xl font-semibold mb-4">系統狀態檢查</h2>
+            <div class="space-y-4">
+                <button onclick="checkSystemStatus()" class="w-full py-3 bg-primary text-white rounded-xl text-base font-semibold hover:bg-primary/90 transition-colors">
+                    <i class="fa fa-check-circle mr-2"></i>檢查系統狀態
+                </button>
+                <div id="system-status" class="bg-gray-50 p-4 rounded text-sm font-mono">
+                    <p class="text-gray-500">點擊上方按鈕檢查系統狀態...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function checkSystemStatus() {
+            const statusDiv = document.getElementById('system-status');
+            statusDiv.innerHTML = '<i class="fa fa-spinner fa-spin mr-2"></i>正在檢查系統狀態...';
+            
+            let status = '<strong>系統狀態檢查結果：</strong><br><br>';
+            
+            // 檢查代理服務器
+            try {
+                const response = await fetch('http://localhost:3000/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer sk-ef5d339bf70b4f4d8e0657db5ba02d22'
+                    },
+                    body: JSON.stringify({
+                        model: 'deepseek-chat',
+                        messages: [{ role: 'user', content: 'test' }],
+                        max_tokens: 10
+                    })
+                });
+                
+                if (response.ok) {
+                    status += '✅ 代理服務器：運行正常<br>';
+                } else {
+                    status += `❌ 代理服務器：響應錯誤 (${response.status})<br>`;
+                }
+            } catch (error) {
+                status += `❌ 代理服務器：連接失敗 (${error.message})<br>`;
+            }
+            
+            // 檢查本地存儲
+            try {
+                const healthRecords = JSON.parse(localStorage.getItem('healthRecords') || '[]');
+                status += `✅ 本地存儲：${healthRecords.length} 條記錄<br>`;
+            } catch (error) {
+                status += `❌ 本地存儲：讀取失敗<br>`;
+            }
+            
+            // 檢查瀏覽器支持
+            if (typeof fetch !== 'undefined') {
+                status += '✅ 瀏覽器支持：fetch API 可用<br>';
+            } else {
+                status += '❌ 瀏覽器支持：fetch API 不可用<br>';
+            }
+            
+            status += '<br><strong>建議：</strong><br>';
+            if (status.includes('❌')) {
+                status += '• 請檢查代理服務器是否正在運行<br>';
+                status += '• 確保網絡連接正常<br>';
+                status += '• 嘗試刷新頁面<br>';
+            } else {
+                status += '• 系統狀態良好，可以正常使用健康報告功能<br>';
+            }
+            
+            statusDiv.innerHTML = status;
+        }
+    </script>
+</body>
+</html>
